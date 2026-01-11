@@ -1,0 +1,65 @@
+# --- Fichiers Systeme ------------------------------------
+.DS_Store
+Thumbs.db
+
+# --- Environnement --------------------------------------
+.env  
+.env.*             
+
+# --- datashare-api --------------------------------------
+target/
+build/
+*.class
+*.jar
+*.war
+*.pom*
+*.log
+
+# --- datashare-web --------------------------------------
+dist/
+node_modules/
+coverage/
+*.gcno
+*.gcda
+*.gcov
+tmp/
+out-tsc/
+bazel-out/
+*.js.map
+*.ngfactory.ts
+*.ngtsc.ts
+.angular/
+npm-debug.log*
+yarn-error.log
+
+# --- Visual Studio Code ---------------------------------
+.vscode/*
+!datashare.code-workspace
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# --- Autres IDEs ----------------------------------------
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.iml
+
+# --- Divers --------------------------------------------
+.sass-cache/
+connect.lock
+typings/
+__screenshots__/
+docker-compose.override.yml
+*.tmp
+*.seed
+*.log
+*.pid
+*.swp
+*.swo

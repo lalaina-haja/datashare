@@ -1,0 +1,124 @@
+# DataShare
+
+**DataShare** is a full-stack application with a **Spring Boot 4 API (`api`)** and an **Angular frontend (`web`)**, designed with strong testing, security, and automation practices.
+
+## Table of Contents
+
+1. [Monorepo Structure](#monorepo-structure)  
+2. [Requirements](#requirements)  
+3. [Environment Setup](#environment-setup) 
+5. [VS Code Configuration](#vs-code-configuration)   
+6. [Running the Applications](#running-the-applications)  
+7. [Testing](docs/TESTING.md)
+8. [Maintenance](docs/MAINTENANCE.md)
+9. [Performance](docs/PERFORMANCE.md)
+10. [Security](docs/SECURITY.md)
+11. [Quick reference (Makefile commands)](docs/QUICK-REFERENCE.md)
+12. [Notes](#notes)
+
+---
+
+## Monorepo Structure
+```
+datashare/
+├── datashare-api/ # Spring Boot API
+├── datashare-web/ # Angular Web app
+│ └── tests/config/ # Jest / Cypress / Playwright configs
+├── docker-compose.yml # API dependencies (PostgreSQL, S3, etc.)
+├── scripts/bump-version.sh # Script to bump SemVer version
+├── git-hooks/pre-commit/bump-version.sh # Pre-commit hook script
+├── VERSION # Current application version
+├── .env # Environment variables
+├── openapi.yaml # OpenAPI specification
+├── Makefile # Commands for starting apps, building, testing, linting, versioning
+```
+
+---
+
+## Requirements
+
+- **Node.js** >= 20.x  
+- **npm** >= 10.x  
+- **Java 21** (Spring Boot 4)  
+- **Maven** >= 4.x (wrapper included in `datashare-api`)  
+- **Docker & Docker Compose**  
+- **VS Code** (recommended IDE)  
+
+---
+
+## Environment Setup
+
+1. Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+2. Update environment variables:
+```ini
+BASE_URL=http://localhost:4200
+API_URL=http://localhost:8080
+JWT_SECRET=your-jwt-secret
+POSTGRES_USER=db-user
+POSTGRES_PASSWORD=db-password
+POSTGRES_DB=db-name
+```
+
+3. Install web dependencies:
+```bash
+make install-web
+```
+
+4. Maven wrapper for API is included — no extra setup needed.
+
+---
+
+## VS Code Configuration
+- Workspace prevents duplicate compilation errors
+- Linters run only in corresponding apps (api or web)
+- Recommended extensions:
+    - Java Extension Pack (Spring Boot)
+    - Angular Language Service
+    - ESLint
+    - Prettier
+
+---
+
+## Running the Applications
+
+### Start API services (Docker)
+```bash
+make start-services
+```
+
+### Start the backend (API)
+```bash
+make start-api
+```
+Depends on start-services.
+
+### Start the frontend (Web app)
+```bash
+make start-web
+```
+Automatically installs dependencies if needed.
+
+### Start everything together
+```bash
+make start-all
+```
+
+### Stop services
+```bash
+make stop-services
+```
+
+---
+
+## Notes
+- Docker: API services (PostgreSQL, MinIO) containerized
+- Testing: Unit / integration / E2E tests separated; TestContainers for API IT; Cypress & Playwright for Web E2E
+
+---
+### | [Table of Contents](#table-of-contents) |[Testing](docs/TESTING.md) | [Maintenance](docs/MAINTENANCE.md) | [Performance](docs/PERFORMANCE.md) | [Security](docs/SECURITY.md) | [Quick reference](docs/QUICK-REFERENCE.md) |
+

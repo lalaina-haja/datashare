@@ -1,0 +1,39 @@
+# Force LF sur tous les fichiers
+* text=auto eol=lf
+
+*.java text
+*.ts text
+*.js text
+*.html text
+*.scss text
+*.css text
+*.yml text
+*.yaml text
+*.json text
+
+# Traiter les scripts comme texte
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Diff plus lisible
+*.json diff=json
+*.md diff=markdown
+*.yml diff=yaml
+*.yaml diff=yaml
+
+# Maven wrapper
+mvnw text eol=lf
+mvnw.cmd binary
+
+# Node wrapper
+npm bin npm
+
+# Ressources binaires
+openapi.yaml binary
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

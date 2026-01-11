@@ -1,0 +1,39 @@
+{
+    // Java / Spring sur datashare-api
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.import.exclusions": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/coverage/**"
+    ],
+    // ESLint sur datashare-web
+    "eslint.workingDirectories": [
+        {
+            "directory": "datashare-web",
+            "changeProcessCWD": true
+        }
+    ],
+    "typescript.tsdk": "datashare-web/node_modules/typescript/lib",
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.disableAutomaticTypeAcquisition": true,
+    // Informations communes
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/target": true,
+        "**/.git": true,
+        "**/.idea": true,
+        "**/.DS_Store": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/target": true,
+        "**/.git": true
+    },
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/target/**": true
+    }
+}

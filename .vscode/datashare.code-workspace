@@ -1,0 +1,12 @@
+{
+    "folders": [
+        {
+            "name": "datashare-api",
+            "path": "datashare-api"
+        },
+        {
+            "name": "datashare-web",
+            "path": "datashare-web"
+        }
+    ]
+}

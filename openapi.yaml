@@ -1,0 +1,421 @@
+openapi: 3.1.0
+info:
+  title: DataShare API
+  description: |
+    API for freelance and small business file sharing.
+    It allows users to register, upload (private or public), retrieve an
+    upload history, generate short lived download tokens and download files
+    either directly or after a password protected unlock flow.
+  version: 1.0.0
+servers:
+  - url: https://datashare.io
+    description: Production server
+  - url: http://localhost:8080
+    description: Local development server (Spring Boot)
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              email: alice@example.com
+              password: secret123
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Invalid request (e.g., duplicate email)
+
+  /auth/login:
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: alice@example.com
+              password: secret123
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+
+  /files:
+    post:
+      summary: Upload a private file (requires authentication)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadFileRequest'
+      responses:
+        '201':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '400':
+          description: File too large (max 1 GB) or invalid expiration date
+        '401':
+          description: Invalid or missing JWT
+
+    get:
+      summary: Get user upload history
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of uploaded files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileMetadata'
+        '401':
+          description: Invalid or missing JWT
+
+  /files/public:
+    post:
+      summary: Upload a public (no auth) file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadFileRequest'
+      responses:
+        '201':
+          description: Public file uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '400':
+          description: File too large or invalid expiration date
+
+  /files/{fileId}:
+    delete:
+      summary: Delete a file (owner only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: File deleted
+        '403':
+          description: Forbidden (user does not own the file)
+        '401':
+          description: Invalid or missing JWT token
+        '404':
+          description: File not found
+
+    get:
+      summary: Download a file (owner only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Binary file stream (download starts)
+          content:
+            application/octet-stream: {}
+        '403':
+          description: Forbidden (user does not own the file)
+        '401':
+          description: Invalid or missing JWT token
+        '404':
+          description: File not found
+
+  /files/public/{token}:
+    get:
+      summary: Download a file (password protected files trigger a redirect).
+      description: |
+        * If the file is not password protected → stream the file (`200`).  
+        * If it **is** password protected → return a **302 redirect** to the
+          `/files/public/{token}/unlock` page. After the user validates the password
+          the server issues a second redirect back to this endpoint with a
+          temporary token that grants access.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Binary file stream (download starts)
+          content:
+            application/octet-stream: {}
+        '302':
+          description: |
+            Redirect to the unlock page. The `Location` header points to
+             `/files/public/{token}/unlock`.
+        '404':
+          description: File not found or token expired.
+
+  /files/public/{token}/unlock:
+    post:
+      summary: Submit password to unlock a protected file.
+      description: |
+        This endpoint is hit **via POST** (HTML form or JSON body).  
+        If the supplied password matches the stored one, the service creates a
+        short lived *access token* and redirects the client back to the download
+        endpoint (`/files/public/{token}`) with that new token.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRequest'
+      responses:
+        '302':
+          description: Redirect back to `/files/public/{token}` with a newly generated token.
+        '400':
+          description: Invalid request (missing password).
+        '401':
+          description: Wrong password.
+
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    # -----------------------------------------------------------------
+    #  Generic error object
+    # -----------------------------------------------------------------
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP status or internal error code
+        message:
+          type: string
+          description: Human readable error description
+        timestamp:
+          type: string
+          format: date-time
+          description: Time the error was generated (UTC)
+
+    # -----------------------------------------------------------------
+    #  Register / Login DTOs
+    # -----------------------------------------------------------------
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        userId:
+          type: string
+          format: uuid
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: string
+          description: Duration before token expires (e.g. "3600s")
+
+    # -----------------------------------------------------------------
+    #  Upload file DTO – used for both private and public uploads
+    # -----------------------------------------------------------------
+    UploadFileRequest:
+      type: object
+      description: |
+        Payload sent when uploading a file.  
+        * `file` – binary file (max 1 GB).  
+        * `password` – optional password that protects the file (ignored for public uploads).  
+        * `expiresAt` – ISO‑8601 date‑time, <= 7 days from the upload time.  
+        * `tags` – optional list of tags (max 10) used for categorisation.
+      required:
+        - file
+        - expiresAt
+      properties:
+        file:
+          type: string
+          format: binary
+        password:
+          type: string
+          description: |
+            Password that protects the file.  **Only required** when the file is
+            uploaded as private (i.e., not a public upload).  Ignored for public
+            uploads.
+        expiresAt:
+          type: string
+          format: date-time
+          description: |
+            Expiration timestamp (ISO 8601).  Must be at most 7 days after the
+            upload time.
+        tags:
+          type: array
+          items:
+            type: string
+          description: List of tags attached to the file (max 10).
+      examples: 
+        - privateUpload:
+          summary: Upload with password
+          value:
+            file: <binary data>
+            password: secret123
+            expiresAt: '2023-12-31T23:59:59Z'
+            tags:
+              - rapport
+              - finance
+        - publicUpload:
+          summary: Upload without password
+          value:
+            file: <binary data>
+            expiresAt: '2023-11-15T12:00:00Z'
+            tags:
+              - marketing
+
+    # -----------------------------------------------------------------
+    #  Password payload used by the unlock endpoint
+    # -----------------------------------------------------------------
+    PasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          description: Password entered by the user.
+
+    # -----------------------------------------------------------------
+    #  Token‑related objects
+    # -----------------------------------------------------------------
+    TokenInfo:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Short lived access token.
+        expiresAt:
+          type: string
+          format: date-time
+          description: Expiration timestamp of the token.
+        passwordProtected:
+          type: boolean
+          description: Indicates whether the associated file requires a password.
+
+    # -----------------------------------------------------------------
+    #  File metadata returned to the client
+    # -----------------------------------------------------------------
+    FileMetadata:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Original filename supplied by the uploader.
+        size:
+          type: integer
+          format: int64
+          description: Size of the file in bytes.
+        downloadLink:
+          type: string
+          format: uri
+          description: |
+            URL that can be used to download the file.  
+            For password protected files this link contains a `token` query
+            parameter that must be presented on the final download request.
+        passwordProtected:
+          type: boolean
+          description: true when the file is protected by a password.
+        expiresAt:
+          type: string
+          format: date-time
+          description: Timestamp after which the file (or its link) is deleted.
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags attached to the file.
+
+    # -----------------------------------------------------------------
+    #  Registration / Login response examples (kept for reference)
+    # -----------------------------------------------------------------
+    ExampleRegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        userId:
+          type: string
+          format: uuid
+    ExampleLoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: string
