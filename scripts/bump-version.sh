@@ -6,6 +6,7 @@ set -e
 
 TYPE=$1 # major|minor|patch
 VERSION=$(cat VERSION)
+SCRIPT_DIR="$(dirname "$0")"
 
 IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
@@ -19,8 +20,12 @@ esac
 NEW_VERSION="$MAJOR.$MINOR.$PATCH"
 echo "$NEW_VERSION" > VERSION
 
+# Sync version to datashare-api pom.xml
+$SCRIPT_DIR/sync-version-api.sh 1> /dev/null
+
 # Sync version to datashare-web package.json
-./scripts/sync-version-web.sh
+$SCRIPT_DIR/sync-version-web.sh 1> /dev/null
 
 # Commit the version bump
-git commit -am "chore: bump version to $NEW_VERSION"
+git add VERSION datashare-api/pom.xml datashare-web/package.json
+git commit -m "chore: bump version to $NEW_VERSION"

@@ -18,12 +18,6 @@ make bump-version TYPE=minor
 make bump-version TYPE=major
 ```
 
-Sync VERSION -> datashare-web/package.json
-
-```bash
-make sync-version
-```
-
 ## Building
 
 | Target           | Description                                      |

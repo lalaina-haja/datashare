@@ -52,7 +52,6 @@ help:
 	@echo ""
 	@echo "Versioning:"
 	@echo "  make version            Show current version (VERSION file)"
-	@echo "  make sync-version       Sync VERSION -> datashare-web/package.json"
 	@echo "  make bump-version       Bump version (TYPE=patch|minor|major)"
 	@echo ""
 	@echo "Git hooks:"
@@ -79,10 +78,6 @@ endif
 	$(BUMP_SCRIPT) $(TYPE)
 	@echo "New version: $$(cat $(VERSION_FILE))"
 
-.PHONY: sync-version
-sync-version:
-	@./scripts/sync-version-web.sh
-
 # ============================
 # Backend services (Docker)
 # ============================
@@ -100,7 +95,7 @@ stop-services:
 # Web dependencies
 # ============================
 .PHONY: install-web
-install-web: sync-version
+install-web:
 	@echo "Installing datashare-web dependencies..."
 	cd datashare-web && npm install
 

@@ -11,6 +11,21 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
+	<!-- ========================= -->
+	<!-- Properties -->
+	<!-- ========================= -->
+	<properties>
+		<revision>0.1.0</revision>
+		<java.version>21</java.version>
+		<lombok.version>1.18.42</lombok.version>
+		<testcontainers.version>1.19.8</testcontainers.version>
+		<s3.version>2.41.5</s3.version>
+		<mockito.version>5.11.0</mockito.version>
+	</properties>
+
+	<!-- ========================= -->
+	<!-- Project Coordinates -->
+	<!-- ========================= -->
 	<groupId>com.datashare</groupId>
 	<artifactId>datashare-api</artifactId>
 	<version>${revision}</version>
@@ -19,23 +34,12 @@
 	<description>DataShare API</description>
 
 	<!-- ========================= -->
-	<!-- Properties -->
-	<!-- ========================= -->
-	<properties>
-		<!-- fallback si VERSION absent -->
-		<revision>0.0.0-DEV</revision>
-		<java.version>21</java.version>
-		<lombok.version>1.18.42</lombok.version>
-		<testcontainers.version>1.19.8</testcontainers.version>
-		<s3.version>2.41.5</s3.version>
-	</properties>
-
-	<!-- ========================= -->
 	<!-- Dependency Management -->
 	<!-- ========================= -->
 	<dependencyManagement>
 		<dependencies>
-			<!-- Lombok centralisé -->
+
+			<!-- Lombok -->
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
@@ -57,6 +61,15 @@
 				<groupId>software.amazon.awssdk</groupId>
 				<artifactId>bom</artifactId>
 				<version>${s3.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Mockito BOM -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-bom</artifactId>
+				<version>${mockito.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -148,6 +161,16 @@
 			<artifactId>postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<!-- ========================= -->
@@ -155,27 +178,6 @@
 	<!-- ========================= -->
 	<build>
 		<plugins>
-			<!-- Load VERSION -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<id>load-version</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${project.basedir}/../VERSION</file>
-							</files>
-							<failOnMissingFile>true</failOnMissingFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<!-- Spring Boot Maven Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -186,6 +188,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<useModulePath>false</useModulePath>
+					<argLine>-XX:+EnableDynamicAgentLoading</argLine>
 					<systemPropertyVariables>
 						<spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
 					</systemPropertyVariables>
