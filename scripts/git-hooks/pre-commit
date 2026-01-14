@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Running tests..."
-#make test-all
+echo "Running lint..."
+make lint
 
 echo "Pre-commit checks passed"

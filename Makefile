@@ -55,6 +55,10 @@ help:
 	@echo "  make sync-version       Sync VERSION -> datashare-web/package.json"
 	@echo "  make bump-version       Bump version (TYPE=patch|minor|major)"
 	@echo ""
+	@echo "Git hooks:"
+	@echo "  make install-hooks        Install git hooks"
+	@echo "  make uninstall-hooks      Uninstall git hooks"
+	@echo ""
 
 # ============================
 # Versioning
@@ -200,3 +204,19 @@ test-e2e: test-api-e2e test-web-e2e
 .PHONY: test-all
 test-all: test-unit test-it test-e2e
 	@echo "All tests finished."
+
+# ============================
+# Git hooks
+# ============================
+GIT_HOOKS_DIR=scripts/git-hooks
+.PHONY: install-hooks uninstall-hooks
+
+install-hooks:
+	@echo "Installing git hooks..."
+	@git config core.hooksPath $(GIT_HOOKS_DIR)	
+	@echo "Git hooks installed."
+
+uninstall-hooks:
+	@echo "Uninstalling git hooks..."
+	@git config --unset core.hooksPath
+	@echo "Git hooks uninstalled."
