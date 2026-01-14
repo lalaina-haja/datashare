@@ -185,11 +185,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -199,11 +209,22 @@
 	<!-- ========================= -->
 	<profiles>
 
+		<profile>
+			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<spring.profiles.active>local</spring.profiles.active>
+				<skipTests>true</skipTests>
+			</properties>
+		</profile>
+
 		<!-- unit -->
 		<profile>
 			<id>unit</id>
 			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
+				<spring.profiles.active>unit</spring.profiles.active>
 			</properties>
 			<build>
 				<plugins>
@@ -223,7 +244,7 @@
 		<profile>
 			<id>it</id>
 			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
+				<spring.profiles.active>it</spring.profiles.active>
 			</properties>
 			<build>
 				<plugins>
@@ -251,7 +272,7 @@
 		<profile>
 			<id>e2e</id>
 			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
+				<spring.profiles.active>e2e</spring.profiles.active>
 			</properties>
 			<build>
 				<plugins>
