@@ -1,7 +1,6 @@
 package com.datashare.api.service;
 
 import java.time.Instant;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -25,7 +24,7 @@ public class JwtService {
         this.issuer = issuer;
     }
 
-    public String generateToken(String subject, Map<String, Object> claims) {
+    public String generateToken(String userId) {
 
         Instant now = Instant.now();
 
@@ -33,8 +32,7 @@ public class JwtService {
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expirationSeconds))
-                .subject(subject)
-                .claims(c -> c.putAll(claims))
+                .subject(userId)
                 .build();
 
         return jwtEncoder
