@@ -15,6 +15,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+/**
+ * Unit tests for the JwtService class.
+ *
+ * <p>This test class verifies the JWT token generation functionality of the JwtService. It uses
+ * Mockito to mock the JwtEncoder dependency and validates that tokens are generated correctly with
+ * the expected user ID.
+ */
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("unit")
 public class JwtServiceTest {
@@ -25,11 +32,23 @@ public class JwtServiceTest {
 
   private JwtService jwtService;
 
+  /**
+   * Sets up the test fixture before each test.
+   *
+   * <p>Initializes the JwtService with the mocked JwtEncoder, a token expiration time of 3600
+   * seconds, and the issuer "datashare-api".
+   */
   @BeforeEach
   void setup() {
     jwtService = new JwtService(jwtEncoder, 3600L, "datashare-api");
   }
 
+  /**
+   * Tests successful JWT token generation.
+   *
+   * <p>Verifies that when a user ID is provided, the JwtService correctly generates and returns a
+   * JWT token with the expected content.
+   */
   @Test
   public void get_token_successful() {
 
