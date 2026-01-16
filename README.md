@@ -24,9 +24,9 @@ datashare/
 ├── datashare-api/ # Spring Boot API
 ├── datashare-web/ # Angular Web app
 │ └── tests/config/ # Jest / Cypress / Playwright configs
-├── docker-compose.yml # API dependencies (PostgreSQL, S3, etc.)
+├── compose.yaml # API dependencies (PostgreSQL, S3, etc.)
 ├── scripts/bump-version.sh # Script to bump SemVer version
-├── git-hooks/pre-commit/bump-version.sh # Pre-commit hook script
+│ └── git-hooks # git hooks scripts
 ├── VERSION # Current application version
 ├── .env # Environment variables
 ├── openapi.yaml # OpenAPI specification
@@ -55,21 +55,29 @@ cp .env.example .env
 ```
 
 2. Update environment variables:
-```ini
-BASE_URL=http://localhost:4200
-API_URL=http://localhost:8080
-JWT_SECRET=your-jwt-secret
-POSTGRES_USER=db-user
-POSTGRES_PASSWORD=db-password
-POSTGRES_DB=db-name
+```properties
+# Application ports (make sure they are available)
+API_PORT=8080
+WEB_PORT=4200
+
+# Security (change JWT_SECRET value to a real secret)
+JWT_SECRET=your-jwt-secret-minimum-256
+JWT_EXPIRATION=3600000
+
+# Database 
+DB_NAME=database_name
+DB_USER=database_user
+DB_PASSWORD=datashare_password
+
+# AWS S3
+AWS_REGION=aws_localstack_region
+AWS_S3_BUCKET=bucket_name
 ```
 
 3. Install web dependencies:
 ```bash
 make install-web
 ```
-
-4. Maven wrapper for API is included — no extra setup needed.
 
 ---
 
@@ -86,16 +94,10 @@ make install-web
 
 ## Running the Applications
 
-### Start API services (Docker)
-```bash
-make start-services
-```
-
 ### Start the backend (API)
 ```bash
 make start-api
 ```
-Depends on start-services.
 
 ### Start the frontend (Web app)
 ```bash
@@ -107,17 +109,6 @@ Automatically installs dependencies if needed.
 ```bash
 make start-all
 ```
-
-### Stop services
-```bash
-make stop-services
-```
-
----
-
-## Notes
-- Docker: API services (PostgreSQL, MinIO) containerized
-- Testing: Unit / integration / E2E tests separated; TestContainers for API IT; Cypress & Playwright for Web E2E
 
 ---
 ### | [Table of Contents](#table-of-contents) |[Testing](docs/TESTING.md) | [Maintenance](docs/MAINTENANCE.md) | [Performance](docs/PERFORMANCE.md) | [Security](docs/SECURITY.md) | [Quick reference](docs/QUICK-REFERENCE.md) |

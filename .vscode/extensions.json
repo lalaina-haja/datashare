@@ -8,6 +8,7 @@
     "dbaeumer.vscode-eslint",
     "angular.ng-template",
     "firsttris.vscode-jest-runner",
-    "vscjava.vscode-maven"
+    "vscjava.vscode-maven",
+    "mhutchie.git-graph"
   ]
 }

@@ -1,0 +1,7 @@
+# Unit test configuration
+# No DB | No Hibernate | No real JWT Secret (test secret) | No environment variables
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration

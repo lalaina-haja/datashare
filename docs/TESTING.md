@@ -1,20 +1,20 @@
 # Testing
 
-## API Tests (Maven profiles)
+## API Tests (Maven profiles / Cypress)
 
 | Target | Description |
 |--------|-------------|
 | `make test-api-unit` | API unit tests |
-| `make test-api-it` | API integration tests (requires services) |
-| `make test-api-e2e` | API end-to-end tests (requires services) |
+| `make test-api-it` | API integration tests |
+| `make test-api-e2e` | API end-to-end tests with Cypress |
 
-## Web Tests (Jest / Cypress / Playwright)
+## Web Tests (Jest / Playwright)
 
 | Target | Description |
 |--------|-------------|
 | `make test-web-unit` | Jest unit tests |
 | `make test-web-it` | Jest integration tests |
-| `make test-web-e2e` | Cypress + Playwright end-to-end tests |
+| `make test-web-e2e` | Playwright end-to-end tests |
 
 **Note:** Test configuration files are in `datashare-web/tests/config/`.
 

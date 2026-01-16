@@ -20,7 +20,6 @@
     // Informations communes
     "files.exclude": {
         "**/node_modules": true,
-        "**/target": true,
         "**/.git": true,
         "**/.idea": true,
         "**/.DS_Store": true

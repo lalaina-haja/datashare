@@ -1,0 +1,64 @@
+# Application configuration
+spring:
+  application:
+    name: datashare-api
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer: ${spring.application.name}
+  datasource:
+    url: jdbc:postgresql://datashare-db:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  docker:
+    compose:
+      enabled: true
+      file: ../compose.yaml 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+server:
+  port: ${API_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:default-secret-key-32-bytes-min-here-is-a-default-value-!}
+  expiration: ${JWT_EXPIRATION:900}
+
+app:
+  aws:
+    s3:
+      endpoint: http://localhost:4566
+      region: ${AWS_REGION}
+      bucket: ${AWS_S3_BUCKET}
+  cors:
+    allowed-origins: http://localhost:${WEB_PORT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,configprops,health 
+  endpoint:
+    env:
+      enabled: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        type: INFO
+      springframework:
+        boot:
+          docker: DEBUG
+        web:
+          filter:
+            CommonsRequestLoggingFilter: INFO
+        security: DEBUG
+    com:
+      datashare:
+        api: INFO

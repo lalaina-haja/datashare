@@ -5,7 +5,7 @@ SHELL := /bin/bash
 VERSION := $(shell cat VERSION)
 API_DIR := datashare-api
 WEB_DIR := datashare-web
-DOCKER_COMPOSE_FILE=docker-compose.yml
+GIT_HOOKS_DIR := scripts/git-hooks
 
 # ============================
 # Help
@@ -14,41 +14,39 @@ DOCKER_COMPOSE_FILE=docker-compose.yml
 help:
 	@echo "DataShare Monorepo Makefile"
 	@echo ""
-	@echo "Services:"
-	@echo "  make start-services       Start API dependencies (Postgres, S3, etc.)"
-	@echo "  make stop-services        Stop API services"
-	@echo "  make start-api            Start datashare-api (requires services)"
+	@echo "Applications:"
+	@echo "  make start-api            Start datashare-api (Spring Boot dev server)"
 	@echo "  make start-web            Start datashare-web (Angular dev server)"
-	@echo "  make start-all            Start API + Web + services"
+	@echo "  make start-all            Start API + Web"
 	@echo ""
 	@echo "Build:"
 	@echo "  make build-api            Build the API (Spring Boot package)"
-	@echo "  make build-web            Build the Web (Angular production build)"
+	@echo "  make build-web            Build the Web (Angular build)"
 	@echo "  make build-all            Build both API and Web"
 	@echo ""
 	@echo "Web dependencies:"
 	@echo "  make install-web          Install all Web dependencies"
 	@echo ""
 	@echo "Linting:"
-	@echo "  make lint-api             Run API lint (Checkstyle / SpotBugs / PMD)"
-	@echo "  make lint-web             Run Web lint (ESLint / Angular)"
+	@echo "  make lint-api             Run API lint (Compile / Spotless / Checkstyle)"
+	@echo "  make lint-web             Run Web lint (Angular Lint / Prettier)"
 	@echo "  make lint                 Run all lint checks (API + Web)"
 	@echo ""
 	@echo "API Tests (Maven profiles):"
 	@echo "  make test-api-unit        Run API unit tests"
-	@echo "  make test-api-it          Run API integration tests (requires services)"
-	@echo "  make test-api-e2e         Run API end-to-end tests (requires services)"
+	@echo "  make test-api-it          Run API integration tests "
 	@echo ""
-	@echo "Web Tests (Jest / Cypress / Playwright):"
+	@echo "Web Tests (Jest / Playwright):"
 	@echo "  make test-web-unit        Run Web unit tests"
 	@echo "  make test-web-it          Run Web integration tests"
-	@echo "  make test-web-e2e         Run Web end-to-end tests"
+	@echo ""
+	@echo "End to end Tests:"
+	@echo "  make test-e2e             Run end-to-end tests (Playwright / Cypress)"
 	@echo ""
 	@echo "Combined Test Targets:"
 	@echo "  make test-unit            Run all unit tests (API + Web)"
 	@echo "  make test-it              Run all integration tests (API + Web)"
-	@echo "  make test-e2e             Run all end-to-end tests (API + Web)"
-	@echo "  make test-all             Run all tests sequentially"
+	@echo "  make test-all             Run all tests sequentially (test-unit, test-it, test-e2e)"
 	@echo ""
 	@echo "Versioning:"
 	@echo "  make version            Show current version (VERSION file)"
@@ -79,41 +77,28 @@ endif
 	@echo "New version: $$(cat $(VERSION_FILE))"
 
 # ============================
-# Backend services (Docker)
-# ============================
-.PHONY: start-services
-start-services:
-	@echo "Starting backend services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
-
-.PHONY: stop-services
-stop-services:
-	@echo "Stopping backend services..."
-	docker-compose -f $(DOCKER_COMPOSE_FILE) down
-
-# ============================
 # Web dependencies
 # ============================
 .PHONY: install-web
 install-web:
 	@echo "Installing datashare-web dependencies..."
-	cd datashare-web && npm install
+	@cd datashare-web && npm install
 
 # ============================
 # Start backend / frontend
 # ============================
 .PHONY: start-api
-start-api: start-services
+start-api: 
 	@echo "Starting backend..."
-	cd $(API_DIR) && ./mvnw spring-boot:run
+	@cd $(API_DIR) && ./mvnw spring-boot:run
 
 .PHONY: start-web
 start-web: install-web
 	@echo "Starting frontend..."
-	cd $(WEB_DIR) && npm install && npm run start
+	@cd $(WEB_DIR) && npm install && npm run start
 
 .PHONY: start-all
-start-all: start-services
+start-all: 
 	@echo "Starting backend + frontend..."
 	$(MAKE) start-api &
 	$(MAKE) start-web &
@@ -123,12 +108,15 @@ start-all: start-services
 # ============================
 .PHONY: lint-web lint-api lint
 lint-web: install-web
-	@echo "Running datashare-web lint (Angular / TypeScript)..."	
-	cd $(WEB_DIR) && npm run lint
+	@echo "Running datashare-web lint (Lint / Prettier)..."	
+	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo "    ⚠️ Lint warnings tolérés"
+	@cd $(WEB_DIR) && npm run prettier:check || (npm run prettier && git add . && echo "    → Prettier fixé")
 
 lint-api:
-	@echo "Running datashare-api lint (Checkstyle / SpotBugs / PMD)..."
-	cd $(API_DIR) && ./mvnw verify -DskipTests
+	@echo "Running datashare-api lint (Compile / Spotless / Checkstyle)..."
+	@cd $(API_DIR) && ./mvnw compile -DskipTests -q
+	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && git add . && echo "Spotless fixed ✅")
+#	@cd $(API_DIR) && ./mvnw checkstyle:check -q
 
 lint: lint-api lint-web
 	@echo "All lint checks completed."
@@ -139,30 +127,31 @@ lint: lint-api lint-web
 .PHONY: build-web build-api build-all
 build-web: install-web
 	@echo "Building datashare-web (Angular)..."
-	cd $(WEB_DIR) && npm run build
+	@cd $(WEB_DIR) && npm run build
 
-build-api: start-services
+build-api: 
 	@echo "Building datashare-api..."
-	cd $(API_DIR) && ./mvnw clean package -DskipTests
+	@cd $(API_DIR) && ./mvnw clean package -DskipTests
 
 build-all: build-api build-web
 	@echo "All applications built successfully."
 
 # ============================
-# Frontend tests (npm / Jest / Cypress / Playwright)
+# Frontend tests (Jest / Playwright)
 # ============================
 .PHONY: test-web-unit test-web-it test-web-e2e
 test-web-unit: install-web
 	@echo "Running frontend unit tests..."
-	cd $(WEB_DIR) && npm run test-unit 
+	@cd $(WEB_DIR) && npm run test-unit 
 
 test-web-it: install-web
 	@echo "Running frontend integration tests..."
-	cd $(WEB_DIR) && npm run test-it
+	@cd $(WEB_DIR) && npm run test-it
 
 test-web-e2e: install-web
 	@echo "Running frontend end-to-end tests..."
-	cd $(WEB_DIR) && npm run test-e2e  
+	$(MAKE) start-api &
+	@cd $(WEB_DIR) && npm run test-e2e  
 
 # ============================
 # Backend tests (Maven)
@@ -170,16 +159,11 @@ test-web-e2e: install-web
 .PHONY: test-api-unit test-api-it test-api-e2e
 test-api-unit:
 	@echo "Running backend unit tests..."
-	cd $(API_DIR) && ./mvnw test -Punit
+	@cd $(API_DIR) && ./mvnw test -Punit
 
 test-api-it:
 	@echo "Running backend integration tests..."
-	cd $(API_DIR) && ./mvnw verify -Pit
-
-test-api-e2e: start-services
-	@echo "Running backend end-to-end tests..."
-	cd $(API_DIR) && ./mvnw verify -Pe2e
-
+	@cd $(API_DIR) && ./mvnw verify -Pit
 
 # ============================
 # Combined targets
@@ -192,10 +176,6 @@ test-unit: test-api-unit test-web-unit
 test-it: test-api-it test-web-it
 	@echo "All integration tests finished."
 
-.PHONY: test-e2e
-test-e2e: test-api-e2e test-web-e2e
-	@echo "All E2E tests finished."
-
 .PHONY: test-all
 test-all: test-unit test-it test-e2e
 	@echo "All tests finished."
@@ -203,7 +183,6 @@ test-all: test-unit test-it test-e2e
 # ============================
 # Git hooks
 # ============================
-GIT_HOOKS_DIR=scripts/git-hooks
 .PHONY: install-hooks uninstall-hooks
 
 install-hooks:

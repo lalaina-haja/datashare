@@ -1,0 +1,29 @@
+# Application common base configuration
+spring:
+  application:
+    name: datashare-api
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer: ${spring.application.name}
+aws:
+  enabled: false
+
+jwt:
+  secret: unit-and-it-test-secret-key-32-bytes-min-here-it-is
+  expiration: 60
+
+logging:
+  level:
+    org:
+      hibernate:
+        type: info
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: info
+        security: DEBUG
+    com:
+      datashare:
+        api: info

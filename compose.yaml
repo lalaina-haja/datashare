@@ -1,0 +1,43 @@
+services:
+
+  # ---------- PostgreSQL ----------
+  db:
+    image: postgres:17-alpine
+    container_name: datashare-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ---------- LocalStack (S3 mock) ----------
+  s3:
+    image: localstack/localstack:3.3
+    container_name: datashare-s3
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: ${AWS_REGION}
+      HOSTNAME_EXTERNAL: localhost
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      INIT_AWSCLI_COMMANDS: "aws --endpoint-url=http://localhost:4566 s3 mb s3://${AWS_S3_BUCKET} --region ${AWS_REGION}"
+    ports:
+      - "4566:4566"
+    volumes:
+      - s3-data:/var/lib/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal s3 ls || exit 1"]
+
+volumes:
+  db-data:
+  s3-data:

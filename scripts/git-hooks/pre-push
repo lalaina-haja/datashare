@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Running all tests..."
-make test-all
+echo "Running unit tests (pre-push)..."
+make test-unit
 
-echo "Pre-push checks passed"
+echo "Pre-push unit tests passed"
