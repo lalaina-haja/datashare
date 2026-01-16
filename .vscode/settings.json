@@ -2,11 +2,14 @@
     // Java / Spring sur datashare-api
     "java.configuration.updateBuildConfiguration": "disabled",
     "java.compile.nullAnalysis.mode": "automatic",
+    "java.jdt.ls.javadoc.generate": true,
+    "java.help.javadocAtLaunch": true,
     "java.import.exclusions": [
         "**/node_modules/**",
         "**/dist/**",
         "**/coverage/**"
     ],
+
     // ESLint sur datashare-web
     "eslint.workingDirectories": [
         {
@@ -17,6 +20,7 @@
     "typescript.tsdk": "datashare-web/node_modules/typescript/lib",
     "typescript.tsserver.maxTsServerMemory": 4096,
     "typescript.disableAutomaticTypeAcquisition": true,
+
     // Informations communes
     "files.exclude": {
         "**/node_modules": true,

@@ -1,6 +1,6 @@
 package com.datashare.api.controller;
 
-import com.datashare.api.service.JwtService;
+import com.datashare.api.service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,4 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final JwtService jwtService;
+
+  // TODO: Implement authentication endpoints (e.g., register, login, token
+  // refresh)
 }

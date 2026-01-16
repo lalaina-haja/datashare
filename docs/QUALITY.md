@@ -1,63 +1,71 @@
 # Quality
 
-## Version Management
+## Purpose
 
-Current version stored in `VERSION` file.
+This document defines quality standards and enforcement mechanisms.
 
-Show version:
+---
 
-```bash
-make version
-```
+## Quality Principles
 
-Bump version (uses `scripts/bump-version.sh`):
+* Maintainability
+* Security
+* Performance
+* Accessibility
+* Testability
 
-```bash
-make bump-version TYPE=patch
-make bump-version TYPE=minor
-make bump-version TYPE=major
-```
+---
 
-## Building
+## REST API Quality
 
-| Target           | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| `make build-api` | Build the API (`datashare-api`)                  |
-| `make build-web` | Build the Web (`datashare-web`)                  |
-| `make build-all` | Build both API and Web                           |
+* Consistent HTTP methods
+* Proper HTTP status codes
+* Clear request/response models
 
-## Linting
+---
 
-| Target          | Description                            |
-| --------------- | -------------------------------------- |
-| `make lint-api` | API lint (Compile / Spotless / Checkstyle) |
-| `make lint-web` | Web lint (Angular Lint / Prettier)     |
-| `make lint`     | Run all lint checks (API + Web)        |
+## Validation & Error Management
 
-## Git hooks
+* Client-side and server-side validation
+* Centralized error handling
+* User-friendly error messages
 
-Some git hooks is provided in the script folder :
+---
 
-```bash
-scripts/git-hooks/
-```
+## Code Formatting & Static Analysis
 
-| Hook         | It runs          |
-| ------------ | ---------------- |
-| `pre-commit` | `make link`      |
-| `pre-push`   | `make test-unit` |
+### Spotless
 
-To install git hooks run:
+* Automatic code formatting
+* Google Java Format
+* Import ordering and cleanup
 
-```bash
-make install-hooks
-```
+### Checkstyle
 
-To uninstall git hooks run:
+* Structural rules only:
 
-```bash
-make uninstall-hooks
-```
+  * method size
+  * file size
+  * cyclomatic complexity
+* No formatting overlap with Spotless
+
+---
+
+## Automation
+
+Makefile targets:
+* `make lint-api` : Runs API lint (Compile /  Spotless / Checkstyle) 
+* `make lint-web` : Runs Web lint (Angular Lint / Prettier) 
+* `make lint`     : Run all lint checks (API + Web) 
+	
+
+---
+
+## Accessibility as a Quality Requirement
+
+* PSH accessibility treated as non-functional requirement
+* Accessibility checks included in testing strategy
+
 ---
 
 ### | [⬅ Back to DataShare README](../README.md) |

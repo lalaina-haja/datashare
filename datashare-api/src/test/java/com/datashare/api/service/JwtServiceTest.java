@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.datashare.api.service.security.JwtService;
 import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -29,8 +32,12 @@ public class JwtServiceTest {
   private static final String USER_ID = "test-subject";
 
   @Mock private JwtEncoder jwtEncoder;
+  private JwtDecoder jwtDecoder;
 
   private JwtService jwtService;
+
+  private static final String EMAIL = "email.mail.com";
+  private static final String PASSWORD = "PASSWORD";
 
   /**
    * Sets up the test fixture before each test.
@@ -40,7 +47,7 @@ public class JwtServiceTest {
    */
   @BeforeEach
   void setup() {
-    jwtService = new JwtService(jwtEncoder, 3600L, "datashare-api");
+    jwtService = new JwtService(jwtEncoder, jwtDecoder, 3600L, "datashare-api");
   }
 
   /**
@@ -52,7 +59,12 @@ public class JwtServiceTest {
   @Test
   public void get_token_successful() {
 
-    // GIVEN the user ID and the token
+    // GIVEN the user and the token
+    UserDetails userDetails =
+        org.springframework.security.core.userdetails.User.builder()
+            .username(EMAIL)
+            .password(PASSWORD)
+            .build();
     String expectedToken = "token";
     Jwt jwt =
         new Jwt(
@@ -64,7 +76,7 @@ public class JwtServiceTest {
     when(jwtEncoder.encode(any())).thenReturn(jwt);
 
     // WHEN generating a token
-    String returnedToken = jwtService.generateToken(USER_ID);
+    String returnedToken = jwtService.generateToken(userDetails);
 
     // THEN the token is returned successfully
     assertThat(returnedToken).isEqualTo(expectedToken);

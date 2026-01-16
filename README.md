@@ -4,21 +4,21 @@
 
 ## Table of Contents
 
-1. [Monorepo Structure](#monorepo-structure)  
-2. [Requirements](#requirements)  
-3. [Environment Setup](#environment-setup) 
-5. [VS Code Configuration](#vs-code-configuration)   
-6. [Running the Applications](#running-the-applications)  
-7. [Testing](docs/TESTING.md)
-8. [Maintenance](docs/MAINTENANCE.md)
-9. [Performance](docs/PERFORMANCE.md)
-10. [Security](docs/SECURITY.md)
-11. [Quick reference (Makefile commands)](docs/QUICK-REFERENCE.md)
-12. [Notes](#notes)
+1. [Monorepo Structure](#monorepo-structure)
+2. [Requirements](#requirements)
+3. [Environment Setup](#environment-setup)
+4. [Running the Applications](#running-the-applications)
+5. [Quality](docs/QUALITY.md)
+6. [Testing](docs/TESTING.md)
+7. [Maintenance](docs/MAINTENANCE.md)
+8. [Performance](docs/PERFORMANCE.md)
+9. [Security](docs/SECURITY.md)
+10. [Quick reference (Makefile commands)](docs/QUICK-REFERENCE.md)
 
 ---
 
 ## Monorepo Structure
+
 ```
 datashare/
 ├── datashare-api/ # Spring Boot API
@@ -37,16 +37,16 @@ datashare/
 
 ## Requirements
 
-- **Node.js** >= 20.x  
-- **npm** >= 10.x  
-- **Java 21** (Spring Boot 4)  
-- **Maven** >= 4.x (wrapper included in `datashare-api`)  
-- **Docker & Docker Compose**  
-- **VS Code** (recommended IDE)  
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- **Java 21** (Spring Boot 4)
+- **Maven** >= 4.x (wrapper included in `datashare-api`)
+- **Docker & Docker Compose**
+- **VS Code** (recommended IDE)
 
 ---
 
-## Environment Setup
+## Quick Start
 
 1. Copy `.env.example` to `.env`:
 
@@ -54,62 +54,37 @@ datashare/
 cp .env.example .env
 ```
 
-2. Update environment variables:
-```properties
-# Application ports (make sure they are available)
-API_PORT=8080
-WEB_PORT=4200
-
-# Security (change JWT_SECRET value to a real secret)
-JWT_SECRET=your-jwt-secret-minimum-256
-JWT_EXPIRATION=3600000
-
-# Database 
-DB_NAME=database_name
-DB_USER=database_user
-DB_PASSWORD=datashare_password
-
-# AWS S3
-AWS_REGION=aws_localstack_region
-AWS_S3_BUCKET=bucket_name
-```
+2. Update environment variables in `.env` file
 
 3. Install web dependencies:
+
 ```bash
 make install-web
 ```
 
----
+4. Optional: Install git hooks (for development use):
 
-## VS Code Configuration
-- Workspace prevents duplicate compilation errors
-- Linters run only in corresponding apps (api or web)
-- Recommended extensions:
-    - Java Extension Pack (Spring Boot)
-    - Angular Language Service
-    - ESLint
-    - Prettier
+```bash
+make install-hooks
+```
 
----
+5. Running the Applications
 
-## Running the Applications
-
-### Start the backend (API)
+- Start the backend (API)
 ```bash
 make start-api
 ```
 
-### Start the frontend (Web app)
+- Start the frontend (Web app)
 ```bash
 make start-web
 ```
-Automatically installs dependencies if needed.
 
-### Start everything together
+- Start everything together
 ```bash
 make start-all
 ```
 
 ---
-### | [Table of Contents](#table-of-contents) |[Testing](docs/TESTING.md) | [Maintenance](docs/MAINTENANCE.md) | [Performance](docs/PERFORMANCE.md) | [Security](docs/SECURITY.md) | [Quick reference](docs/QUICK-REFERENCE.md) |
 
+### | [Table of Contents](#table-of-contents) |[Testing](docs/TESTING.md) | [Maintenance](docs/MAINTENANCE.md) | [Performance](docs/PERFORMANCE.md) | [Security](docs/SECURITY.md) | [Quick reference](docs/QUICK-REFERENCE.md) |
