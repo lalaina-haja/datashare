@@ -3,6 +3,7 @@ package com.datashare.api;
 import com.datashare.api.configuration.DotenvInitializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Main entry point for the Datashare API Spring Boot application.
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * <p>Initializes the application with custom environment variable loading from a .env file through
  * the DotenvInitializer.
  */
+@ComponentScan(basePackages = "com.datashare.api")
 @SpringBootApplication
 public class DatashareApiApplication {
 

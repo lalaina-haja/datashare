@@ -9,8 +9,8 @@
  * <ul>
  *   <li>{@link com.datashare.api.handler.RestExceptionHandler} - Global exception handler for REST
  *       endpoints
- *   <li>{@link com.datashare.api.handler.ResourceNotFoundException} - Custom exception for missing
- *       resources
+ *   <li>{@link com.datashare.api.exception.ResourceNotFoundException} - Custom exception for
+ *       missing resources
  *   <li>{@link com.datashare.api.handler.ErrorDetails} - Error response data transfer object
  *   <li>{@link com.datashare.api.handler.ActiveProfileLogger} - Spring profile logger component
  * </ul>

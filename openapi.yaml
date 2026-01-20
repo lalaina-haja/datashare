@@ -417,5 +417,11 @@ components:
       properties:
         token:
           type: string
-        expiresIn:
+          description: JWT token string.
+        expiresAt:
           type: string
+          format: date-time
+          description: Expiration timestamp of the token.
+        expiresIn:
+          type: number
+          description: Duration in seconds before token expires (e.g. 3600)

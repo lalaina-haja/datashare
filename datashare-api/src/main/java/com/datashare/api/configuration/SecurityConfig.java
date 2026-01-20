@@ -1,13 +1,8 @@
 package com.datashare.api.configuration;
 
 import com.datashare.api.service.security.CustomUserDetailService;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import jakarta.annotation.PostConstruct;
-import java.nio.charset.StandardCharsets;
-import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,17 +15,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Configuration for Spring Security.
+ * Spring Security configuration for the application.
  *
- * <p>This class defines the security filter chain for the application, configuring CSRF protection,
- * authorization rules, and OAuth2 JWT resource server.
+ * <p>Defines the security filter chain, authentication providers, and authorization rules.
+ * Configures JWT-based OAuth2 resource server authentication, CSRF protection, and endpoint access
+ * control. Authentication endpoints ({@code /auth/**}), actuator endpoints, and public files are
+ * permit-all, while all other requests require JWT authentication.
  */
 @Configuration
 @EnableWebSecurity
@@ -40,58 +33,13 @@ public class SecurityConfig {
 
   @Autowired private CustomUserDetailService customUserDetailService;
 
-  @Value("${jwt.secret}")
-  private String secret;
-
-  private SecretKeySpec secretKey;
-
-  /**
-   * Initializes and validates the JWT secret key.
-   *
-   * <p>Verifies that the secret is at least 32 characters (256 bits) and creates a SecretKeySpec
-   * for HMAC SHA-256 signing.
-   *
-   * @throws IllegalStateException if the secret is less than 256 bits
-   */
-  @PostConstruct
-  @SuppressWarnings("unused")
-  void init() {
-    if (secret.length() < 32) {
-      throw new IllegalStateException("JWT secret must be at least 256 bits");
-    }
-    this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-  }
-
-  /**
-   * Creates a JwtEncoder bean for token generation.
-   *
-   * @return a NimbusJwtEncoder configured with the secret key
-   */
-  @Bean
-  @SuppressWarnings("unused")
-  JwtEncoder jwtEncoder() {
-    return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
-  }
-
-  /**
-   * Creates a JwtDecoder bean for token validation.
-   *
-   * @return a NimbusJwtDecoder configured with the secret key
-   */
-  @Bean
-  @SuppressWarnings("unused")
-  JwtDecoder jwtDecoder() {
-    return NimbusJwtDecoder.withSecretKey(secretKey).build();
-  }
-
-  @Bean
   /**
    * Provides an AuthenticationProvider that delegates to the application's {@link
-   * com.datashare.api.service.security.CustomUserDetailService} and uses the configured password
-   * encoder.
+   * CustomUserDetailService} and uses the configured password encoder.
    *
    * @return a configured {@link AuthenticationProvider} bean
    */
+  @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(customUserDetailService);
     authProvider.setPasswordEncoder(passwordEncoder());
@@ -99,8 +47,10 @@ public class SecurityConfig {
   }
 
   /**
-   * Exposes the framework-provided {@link AuthenticationManager} so it can be injected elsewhere in
-   * the application (for example in authentication endpoints).
+   * Exposes the framework-provided AuthenticationManager as a bean.
+   *
+   * <p>This allows the authentication manager to be injected elsewhere in the application, such as
+   * in authentication endpoints or other security-related components.
    *
    * @param config the {@link AuthenticationConfiguration}
    * @return the application {@link AuthenticationManager}
@@ -115,21 +65,27 @@ public class SecurityConfig {
   /**
    * Configures the security filter chain for HTTP requests.
    *
-   * <p>Permits public access to authentication endpoints, health/info actuators, and public files.
-   * All other requests require authentication via JWT.
+   * <p>Permits public access to:
    *
-   * @param http the HttpSecurity object to configure
-   * @return the configured SecurityFilterChain
+   * <ul>
+   *   <li>Authentication endpoints ({@code /auth/**})
+   *   <li>Actuator endpoints ({@code /actuator/**})
+   *   <li>Public files ({@code /files/public/**})
+   * </ul>
+   *
+   * <p>All other requests require JWT authentication via OAuth2 resource server. CSRF protection is
+   * disabled as JWT tokens are used instead.
+   *
+   * @param http the {@link HttpSecurity} object to configure
+   * @return the configured {@link SecurityFilterChain}
    * @throws Exception if an error occurs during configuration
    */
   @Bean
-  @SuppressWarnings("unused")
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(
-                        "/auth/**", "/actuator/health", "/actuator/info", "/files/public/**")
+                auth.requestMatchers("/auth/**", "/actuator/**", "/files/public/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

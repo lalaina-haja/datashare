@@ -4,6 +4,7 @@ import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -38,12 +39,13 @@ public class JwtService {
   public JwtService(
       JwtEncoder jwtEncoder,
       JwtDecoder jwtDecoder,
-      @Value("${jwt.expiration}") long expirationSeconds,
-      @Value("${spring.application.name}") String issuer) {
+      @Value("${security.jwt.expiration}") long expirationSeconds,
+      @Value("${security.jwt.issuer}") String issuer) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
     this.expirationSeconds = expirationSeconds;
     this.issuer = issuer;
+    log.info("jwtService created with: " + expirationSeconds + ", " + issuer);
   }
 
   /**
@@ -67,7 +69,11 @@ public class JwtService {
             .subject(userDetails.getUsername())
             .build();
 
-    return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
+    Jwt jwt =
+        jwtEncoder.encode(
+            JwtEncoderParameters.from(JwsHeader.with(() -> "HS256").build(), claimsSet));
+
+    return jwt.getTokenValue();
   }
 
   /**
@@ -93,6 +99,40 @@ public class JwtService {
     } catch (JwtException e) {
       log.debug("Invalid token: {}", e.getMessage());
       return false;
+    }
+  }
+
+  /**
+   * Get the expiration time of the JWT in seconds from now.
+   *
+   * @param token the JWT string
+   * @return the number of seconds until expiration, or "0" if expired or invalid
+   */
+  public Instant getExpiresAt(String token) {
+    try {
+      Jwt jwt = jwtDecoder.decode(token);
+      return jwt.getExpiresAt();
+    } catch (JwtException e) {
+      log.debug("Invalid token: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get the expiration duration in seconds.
+   *
+   * @return the expiration duration in seconds
+   */
+  public Long getExpiresIn(String token) {
+    try {
+      Jwt jwt = jwtDecoder.decode(token);
+      Instant exp = jwt.getExpiresAt();
+      return (exp != null)
+          ? Math.max(0, java.time.Duration.between(Instant.now(), exp).getSeconds())
+          : 0L;
+    } catch (JwtException e) {
+      log.debug("Invalid token: {}", e.getMessage());
+      return 0L;
     }
   }
 

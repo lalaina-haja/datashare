@@ -1,12 +1,9 @@
 # Integration test configuration
-# Uses Testcontainers Postgres DB | Hibernate enabled | No real JWT Secret (test secret) | No environment variables
-spring:
-  datasource:
-    url: jdbc:tc:postgresql:16:///datashare
-    username: test
-    password: test
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+# Uses Testcontainers Postgres DB | No real JWT Secret (test secret)
+aws:
+  s3:
+    endpoint: http://localhost:4566
+    region: ${AWS_REGION}
+    bucket: ${AWS_S3_BUCKET}
+  cors:
+    allowed-origins: http://localhost:${WEB_PORT}

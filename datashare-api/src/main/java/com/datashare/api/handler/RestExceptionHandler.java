@@ -1,78 +1,124 @@
 package com.datashare.api.handler;
 
+import com.datashare.api.dto.ApiErrorDto;
+import com.datashare.api.dto.ValidationErrorDto;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
- * Global exception handler for REST endpoints.
+ * Global exception handler for REST controllers.
  *
- * <p>This class provides centralized exception handling for the REST API, converting various types
- * of exceptions into appropriate HTTP responses with error details. It extends Spring's
- * ResponseEntityExceptionHandler to handle common Spring exceptions as well.
- *
- * <p>The handler maps different exception types to their corresponding HTTP status codes: -
- * IllegalArgumentException and IllegalStateException → 400 Bad Request - ResourceNotFoundException
- * → 404 Not Found - BadCredentialsException → 401 Unauthorized - AccessDeniedException → 403
- * Forbidden - General Exception → 500 Internal Server Error
- *
- * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+ * <p>Handles various exceptions thrown during API request processing and returns structured error
+ * responses with appropriate HTTP status codes.
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   /**
    * Handles IllegalArgumentException and IllegalStateException.
    *
-   * <p>Returns a 400 Bad Request response with error details when these exceptions occur. These
-   * exceptions typically indicate invalid input or invalid state conditions.
+   * <p>Returns a 400 Bad Request response with error details when invalid input or state is
+   * detected.
    *
-   * @param runtimeException the caught exception (either IllegalArgumentException or
-   *     IllegalStateException)
+   * @param runtimeException the caught exception
    * @param request the current web request
    * @return a ResponseEntity with error details and 400 status code
    */
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class})
   protected ResponseEntity<Object> handleConflict(
       RuntimeException runtimeException, WebRequest request) {
+
     logError(runtimeException);
+
     return handleExceptionInternal(
         runtimeException,
-        getErrorDetails(runtimeException, request),
+        ApiErrorDto.of(HttpStatus.BAD_REQUEST.value(), runtimeException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.BAD_REQUEST,
         request);
   }
 
-  /**
-   * Handles ResourceNotFoundException.
-   *
-   * <p>Returns a 404 Not Found response with error details when a requested resource is not found.
-   *
-   * @param runtimeException the ResourceNotFoundException caught
-   * @param request the current web request
-   * @return a ResponseEntity with error details and 404 status code
-   */
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(value = {ResourceNotFoundException.class})
-  protected ResponseEntity<Object> handleNotFound(
-      RuntimeException runtimeException, WebRequest request) {
-    logError(runtimeException);
+  @Override
+  protected ResponseEntity<Object> handleNoResourceFoundException(
+      NoResourceFoundException exception,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+
+    logError(exception);
+
     return handleExceptionInternal(
-        runtimeException,
-        getErrorDetails(runtimeException, request),
+        exception,
+        ApiErrorDto.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.NOT_FOUND,
         request);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleNoHandlerFoundException(
+      NoHandlerFoundException exception,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+
+    logError(exception);
+
+    return handleExceptionInternal(
+        exception,
+        ApiErrorDto.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
+        new HttpHeaders(),
+        HttpStatus.NOT_FOUND,
+        request);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException exception,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+
+    Map<String, String> errors = new HashMap<>();
+    exception
+        .getBindingResult()
+        .getFieldErrors()
+        .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+    logError(exception);
+
+    return ResponseEntity.badRequest().body(ValidationErrorDto.of(errors, request));
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException exception,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+
+    logError(exception);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiErrorDto.of(HttpStatus.BAD_REQUEST.value(), "Invalid request content", request));
   }
 
   /**
@@ -89,10 +135,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(value = {BadCredentialsException.class})
   protected ResponseEntity<Object> handleBadCredentialsException(
       BadCredentialsException badCredentialsException, WebRequest request) {
+
     logError(badCredentialsException);
+
     return handleExceptionInternal(
         badCredentialsException,
-        getErrorDetails(badCredentialsException, request),
+        ApiErrorDto.of(
+            HttpStatus.UNAUTHORIZED.value(), badCredentialsException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.UNAUTHORIZED,
         request);
@@ -101,8 +150,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   /**
    * Handles AccessDeniedException.
    *
-   * <p>Returns a 403 Forbidden response with error details when the user lacks sufficient
-   * permissions to access the requested resource.
+   * <p>Returns a 403 Forbidden response with error details when access to a resource is denied.
    *
    * @param accessDeniedException the caught AccessDeniedException
    * @param request the current web request
@@ -112,10 +160,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(value = {AccessDeniedException.class})
   protected ResponseEntity<Object> handleForbiddenException(
       AccessDeniedException accessDeniedException, WebRequest request) {
+
     logError(accessDeniedException);
+
     return handleExceptionInternal(
         accessDeniedException,
-        getErrorDetails(accessDeniedException, request),
+        ApiErrorDto.of(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.FORBIDDEN,
         request);
@@ -134,33 +184,26 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(value = {Exception.class})
   protected ResponseEntity<Object> handleException(
       RuntimeException runtimeException, WebRequest request) {
+
     logError(runtimeException);
+
     return handleExceptionInternal(
         runtimeException,
-        "Internal Server error",
+        ApiErrorDto.of(
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            "Internal Server error",
+            request.getDescription(false).replace("uri=", "")),
         new HttpHeaders(),
         HttpStatus.INTERNAL_SERVER_ERROR,
         request);
   }
 
   /**
-   * Logs exception details to the error logger.
+   * Logs es details to the error logger.
    *
    * @param exception the exception to log
    */
   private void logError(Exception exception) {
     logger.error(exception.getMessage(), exception);
-  }
-
-  /**
-   * Creates error details containing timestamp, message, and request path.
-   *
-   * @param exception the exception from which to extract the error message
-   * @param request the current web request containing the request path
-   * @return an ErrorDetails object with error information
-   */
-  private ErrorDetails getErrorDetails(Exception exception, WebRequest request) {
-    return new ErrorDetails(
-        LocalDateTime.now(), exception.getMessage(), request.getDescription(false));
   }
 }
