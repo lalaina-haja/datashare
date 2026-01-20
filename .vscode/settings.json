@@ -2,8 +2,6 @@
     // Java / Spring sur datashare-api
     "java.configuration.updateBuildConfiguration": "disabled",
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.jdt.ls.javadoc.generate": true,
-    "java.help.javadocAtLaunch": true,
     "java.import.exclusions": [
         "**/node_modules/**",
         "**/dist/**",
