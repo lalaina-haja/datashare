@@ -8,66 +8,76 @@ WEB_DIR := datashare-web
 GIT_HOOKS_DIR := scripts/git-hooks
 
 # Define colors
-RED    := \033[0;31m
-GREEN  := \033[0;32m
-YELLOW := \033[0;33m
-BLUE   := \033[0;34m
-NC     := \033[0m  # No Color
+COLOR_TITLE    := \033[1;92m # High Intensity Green
+COLOR_KEYWORD  := \033[0;96m # Underlined White
+COLOR_MESSAGE  := \033[1;37m # White
+COLOR_NOCOLOR  := \033[0m  # No Color
 
+# Text Format
+F_MESSAGE := $(COLOR_NOCOLOR)[$(COLOR_TITLE)make$(COLOR_NOCOLOR)] $(COLOR_MESSAGE)
+F_TITLE   := $(COLOR_NOCOLOR)$(COLOR_TITLE)
+F_REGULAR := $(COLOR_NOCOLOR)
+F_KEYWORD := $(COLOR_NOCOLOR)$(COLOR_KEYWORD)
 # ============================
 # Help
 # ============================
 .PHONY: help
 help:
 	@echo ""
-	@echo -e "$(GREEN)DataShare Monorepo Makefile"
+	@echo -e "$(F_MESSAGE)DataShare Monorepo Makefile"
 	@echo ""
-	@echo -e "$(BLUE)Applications:"
-	@echo -e "$(YELLOW)  make start-api            $(NC)Start datashare-api (Spring Boot dev server)"
-	@echo -e "$(YELLOW)  make start-web            $(NC)Start datashare-web (Angular dev server)"
-	@echo -e "$(YELLOW)  make start-all            $(NC)Start API + Web"
+	@echo -e "$(F_TITLE)Applications:                        "
+	@echo -e "$(F_KEYWORD)  make start-api            $(F_REGULAR)Start datashare-api (Spring Boot dev server)"
+	@echo -e "$(F_KEYWORD)  make start-web            $(F_REGULAR)Start datashare-web (Angular dev server)"
+	@echo -e "$(F_KEYWORD)  make start-all            $(F_REGULAR)Start API + Web"
 	@echo ""
-	@echo -e "$(BLUE)Build:"
-	@echo -e "$(YELLOW)   make build-api            $(NC)Build the API (Spring Boot package)"
-	@echo -e "$(YELLOW)   make build-web            $(NC)Build the Web (Angular build)"
-	@echo -e "$(YELLOW)   make build-all            $(NC)Build both API and Web"
+	@echo -e "$(F_TITLE)Build:"
+	@echo -e "$(F_KEYWORD)   make build-api            $(F_REGULAR)Build the API (Spring Boot package)"
+	@echo -e "$(F_KEYWORD)   make build-web            $(F_REGULAR)Build the Web (Angular build)"
+	@echo -e "$(F_KEYWORD)   make build-all            $(F_REGULAR)Build both API and Web"
 	@echo ""
-	@echo -e "$(BLUE)Web dependencies:"
-	@echo -e "$(YELLOW)   make install-web          $(NC)Install all Web dependencies"
+	@echo -e "$(F_TITLE)Web dependencies:"
+	@echo -e "$(F_KEYWORD)   make install-web          $(F_REGULAR)Install all Web dependencies"
 	@echo ""
-	@echo -e "$(BLUE)Linting:"
-	@echo -e "$(YELLOW)   make lint-api             $(NC)Run API lint (Compile / Spotless / Checkstyle)"
-	@echo -e "$(YELLOW)   make lint-web             $(NC)Run Web lint (Angular Lint / Prettier)"
-	@echo -e "$(YELLOW)   make lint                 $(NC)Run all lint checks (API + Web)"
+	@echo -e "$(F_TITLE)Linting:"
+	@echo -e "$(F_KEYWORD)   make lint-api             $(F_REGULAR)Run API lint (Compile / Spotless / Checkstyle)"
+	@echo -e "$(F_KEYWORD)   make lint-web             $(F_REGULAR)Run Web lint (Angular Lint / Prettier)"
+	@echo -e "$(F_KEYWORD)   make lint                 $(F_REGULAR)Run all lint checks (API + Web)"
 	@echo ""
-	@echo -e "$(BLUE)API Tests (Maven profiles):"
-	@echo -e "$(YELLOW)   make test-api-unit        $(NC)Run API unit tests"
-	@echo -e "$(YELLOW)   make test-api-it          $(NC)Run API integration tests "
+	@echo -e "$(F_TITLE)API Tests (Maven profiles):"
+	@echo -e "$(F_KEYWORD)   make test-api-unit        $(F_REGULAR)Run API unit tests"
+	@echo -e "$(F_KEYWORD)   make test-api-it          $(F_REGULAR)Run API integration tests "
 	@echo ""
-	@echo -e "$(BLUE)Web Tests (Jest / Playwright):"
-	@echo -e "$(YELLOW)   make test-web-unit        $(NC)Run Web unit tests"
-	@echo -e "$(YELLOW)   make test-web-it          $(NC)Run Web integration tests"
+	@echo -e "$(F_TITLE)Web Tests (Jest / Playwright):"
+	@echo -e "$(F_KEYWORD)   make test-web-unit        $(F_REGULAR)Run Web unit tests"
+	@echo -e "$(F_KEYWORD)   make test-web-it          $(F_REGULAR)Run Web integration tests"
 	@echo ""
-	@echo -e "$(BLUE)End to end Tests:"
-	@echo -e "$(YELLOW)   make test-e2e             $(NC)Run end-to-end tests (Playwright / Cypress)"
+	@echo -e "$(F_TITLE)End to end Tests:"
+	@echo -e "$(F_KEYWORD)   make test-e2e             $(F_REGULAR)Run end-to-end tests (Playwright / Cypress)"
 	@echo ""
-	@echo -e "$(BLUE)Combined Test Targets:"
-	@echo -e "$(YELLOW)   make test-unit            $(NC)Run all unit tests (API + Web)"
-	@echo -e "$(YELLOW)   make test-it              $(NC)Run all integration tests (API + Web)"
-	@echo -e "$(YELLOW)   make test-all             $(NC)Run all tests sequentially (test-unit, test-it, test-e2e)"
+	@echo -e "$(F_TITLE)Combined Test Targets:"
+	@echo -e "$(F_KEYWORD)   make test-unit            $(F_REGULAR)Run all unit tests (API + Web)"
+	@echo -e "$(F_KEYWORD)   make test-it              $(F_REGULAR)Run all integration tests (API + Web)"
+	@echo -e "$(F_KEYWORD)   make test-all             $(F_REGULAR)Run all tests sequentially (test-unit, test-it, test-e2e)"
 	@echo ""
-	@echo -e "$(BLUE)Versioning:"
-	@echo -e "$(YELLOW)   make version              $(NC)Show current version (VERSION file)"
-	@echo -e "$(YELLOW)   make bump-version         $(NC)Bump version (TYPE=patch|minor|major)"
+	@echo -e "$(F_TITLE)Versioning:"
+	@echo -e "$(F_KEYWORD)   make version              $(F_REGULAR)Show current version (VERSION file)"
+	@echo -e "$(F_KEYWORD)   make bump-version         $(F_REGULAR)Bump version (TYPE=patch|minor|major)"
 	@echo ""
-	@echo -e "$(BLUE)Git hooks:"
-	@echo -e "$(YELLOW)   make install-hooks        $(NC)Install git hooks"
-	@echo -e "$(YELLOW)   make uninstall-hooks      $(NC)Uninstall git hooks"
+	@echo -e "$(F_TITLE)Git hooks:"
+	@echo -e "$(F_KEYWORD)   make install-hooks        $(F_REGULAR)Install git hooks"
+	@echo -e "$(F_KEYWORD)   make uninstall-hooks      $(F_REGULAR)Uninstall git hooks"
 	@echo ""
-	@echo -e "$(BLUE)Run a custom command from API or WEB folder:"
-	@echo -e "$(YELLOW)   make run-api CMD=\"command\" $(NC)Run command from API folder (CMD=\"command --arg\")"
-	@echo -e "$(YELLOW)   make run-web CMD=\"command\" $(NC)Run command from API folder (CMD=\"command --arg\")"
-	@echo -e "$(NC)"
+	@echo -e "$(F_TITLE)Documentation:"
+	@echo -e "$(F_KEYWORD)   make doc-api              $(F_REGULAR)Backend API documentation (Javadoc)"
+	@echo -e "$(F_KEYWORD)   make doc-web              $(F_REGULAR)Frontend API documentation (Typedoc)"
+	@echo -e "$(F_KEYWORD)   make doc                  $(F_REGULAR)Combined documentation (Javadoc + Typedoc)"
+	@echo -e "$(F_KEYWORD)   make publish-doc          $(F_REGULAR)Git commit updated docs"
+	@echo ""
+	@echo -e "$(F_TITLE)Run a custom command from API or WEB folder:"
+	@echo -e "$(F_KEYWORD)   make run-api CMD=\"command\" $(F_REGULAR)Run command from API folder (CMD=\"command --arg\")"
+	@echo -e "$(F_KEYWORD)   make run-web CMD=\"command\" $(F_REGULAR)Run command from API folder (CMD=\"command --arg\")"
+	@echo -e "$(F_REGULAR)"
 
 # ============================
 # Versioning
@@ -84,16 +94,16 @@ bump-version:
 ifndef TYPE
 	$(error "You must provide TYPE=patch|minor|major, e.g., make bump-version TYPE=minor")
 endif
-	@echo -e "$(GREEN)[make] $(YELLOW)Bumping version ($(TYPE))...$(NC)"
+	@echo -e "$(F_MESSAGE)Bumping version ($(TYPE))...$(F_REGULAR)"
 	$(BUMP_SCRIPT) $(TYPE)
-	@echo -e "$(GREEN)[make] $(YELLOW)New version: $$(cat $(VERSION_FILE))$(NC)"
+	@echo -e "$(F_MESSAGE)New version: $$(cat $(VERSION_FILE))$(F_REGULAR)"
 
 # ============================
 # Web dependencies
 # ============================
 .PHONY: install-web
 install-web:
-	@echo -e "$(GREEN)[make] $(YELLOW)Installing datashare-web dependencies...$(NC)"
+	@echo -e "$(F_MESSAGE)Installing datashare-web dependencies...$(F_REGULAR)"
 	@cd datashare-web && npm install
 
 # ============================
@@ -101,17 +111,17 @@ install-web:
 # ============================
 .PHONY: start-api
 start-api: 
-	@echo -e "$(GREEN)[make] $(YELLOW)Starting backend...$(NC)"
+	@echo -e "$(F_MESSAGE)Starting backend...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw spring-boot:run
 
 .PHONY: start-web
 start-web: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Starting frontend...$(NC)"
+	@echo -e "$(F_MESSAGE)Starting frontend...$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm install && npm run start
 
 .PHONY: start-all
 start-all: 
-	@echo -e "$(GREEN)[make] $(YELLOW)Starting backend + frontend...$(NC)"
+	@echo -e "$(F_MESSAGE)Starting backend + frontend...$(F_REGULAR)"
 	$(MAKE) start-api &
 	$(MAKE) start-web &
 
@@ -120,46 +130,45 @@ start-all:
 # ============================
 .PHONY: lint-web lint-api lint
 lint-web: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Running datashare-web lint (Lint / Prettier)...$(NC)"	
-	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo -e "$(YELLOW)    ⚠️ Lint warnings tolérés$(NC)"
-	@cd $(WEB_DIR) && npm run prettier:check || (npm run prettier && git add . && echo -e "$(YELLOW)    → Prettier fixé$(NC)")
-
+	@echo -e "$(F_MESSAGE)Running datashare-web lint (Lint / Prettier)...$(F_REGULAR)"	
+	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo -e "$(F_MESSAGE)    ⚠️ Lint warnings tolérés$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run prettier:check || (npm run prettier && echo -e "$(F_MESSAGE)    → Prettier fixé$(F_REGULAR)")
 lint-api:
-	@echo -e "$(GREEN)[make] $(YELLOW)Running datashare-api lint (Compile / Spotless / Checkstyle)...$(NC)"
+	@echo -e "$(F_MESSAGE)Running datashare-api lint (Compile / Spotless / Checkstyle)...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw compile -DskipTests -q
-	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && git add . && echo -e "$(YELLOW)Spotless fixed ✅$(NC)")
-
+	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && echo -e "$(F_MESSAGE)Spotless fixed ✅$(F_REGULAR)")
 lint: lint-api lint-web
-	@echo -e "$(GREEN)[make] $(YELLOW)All lint checks completed.$(NC)"
+	@echo -e "$(F_MESSAGE)All lint checks completed.$(F_REGULAR)"
 
 # ============================
 # Building (Angular / Maven)
 # ============================
 .PHONY: build-web build-api build-all
 build-web: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Building datashare-web (Angular)...$(NC)"
+	@echo -e "$(F_MESSAGE)Building datashare-web (Angular)...$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm run build
 
 build-api: 
-	@echo -e "$(GREEN)[make] $(YELLOW)Building datashare-api...$(NC)"
+	@echo -e "$(F_MESSAGE)Building datashare-api...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw clean package -DskipTests
 
 build-all: build-api build-web
-	@echo -e "$(GREEN)[make] $(YELLOW)All applications built successfully.$(NC)"
+	@echo -e "$(F_MESSAGE)All applications built successfully.$(F_REGULAR)"
+
 # ============================
 # Frontend tests (Jest / Playwright)
 # ============================
 .PHONY: test-web-unit test-web-it test-web-e2e
 test-web-unit: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Running frontend unit tests...$(NC)"
+	@echo -e "$(F_MESSAGE)Running frontend unit tests...$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm run test-unit 
 
 test-web-it: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Running frontend integration tests...$(NC)"
+	@echo -e "$(F_MESSAGE)Running frontend integration tests...$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm run test-it
 
 test-web-e2e: install-web
-	@echo -e "$(GREEN)[make] $(YELLOW)Running frontend end-to-end tests...$(NC)"
+	@echo -e "$(F_MESSAGE)Running frontend end-to-end tests...$(F_REGULAR)"
 	$(MAKE) start-api &
 	@cd $(WEB_DIR) && npm run test-e2e  
 
@@ -168,11 +177,11 @@ test-web-e2e: install-web
 # ============================
 .PHONY: test-api-unit test-api-it test-api-e2e
 test-api-unit:
-	@echo -e "$(GREEN)[make] $(YELLOW)Running backend unit tests...$(NC)"
+	@echo -e "$(F_MESSAGE)Running backend unit tests...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw test -Punit
 
 test-api-it:
-	@echo -e "$(GREEN)[make] $(YELLOW)Running backend integration tests...$(NC)"
+	@echo -e "$(F_MESSAGE)Running backend integration tests...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw verify -Pit
 
 # ============================
@@ -180,14 +189,14 @@ test-api-it:
 # ============================
 .PHONY: test-unit
 test-unit: test-api-unit test-web-unit
-	@echo -e "$(GREEN)[make] $(YELLOW)All unit tests finished.$(NC)"
+	@echo -e "$(F_MESSAGE)All unit tests finished.$(F_REGULAR)"
 
 .PHONY: test-it
 test-it: test-api-it test-web-it
-	@echo -e "$(GREEN)[make] $(YELLOW)All integration tests finished.$(NC)"
+	@echo -e "$(F_MESSAGE)All integration tests finished.$(F_REGULAR)"
 .PHONY: test-all
 test-all: test-unit test-it test-e2e
-	@echo -e "$(GREEN)[make] $(YELLOW)All tests finished.$(NC)"
+	@echo -e "$(F_MESSAGE)All tests finished.$(F_REGULAR)"
 
 # ============================
 # Git hooks
@@ -195,24 +204,43 @@ test-all: test-unit test-it test-e2e
 .PHONY: install-hooks uninstall-hooks
 
 install-hooks:
-	@echo -e "$(GREEN)[make] $(YELLOW)Installing git hooks...$(NC)"
+	@echo -e "$(F_MESSAGE)Installing git hooks...$(F_REGULAR)"
 	@git config core.hooksPath $(GIT_HOOKS_DIR)	
-	@echo -e "$(GREEN)[make] $(YELLOW)Git hooks installed.$(NC)"
+	@echo -e "$(F_MESSAGE)Git hooks installed.$(F_REGULAR)"
 
 uninstall-hooks:
-	@echo -e "$(GREEN)[make] $(YELLOW)Uninstalling git hooks...$(NC)"
+	@echo -e "$(F_MESSAGE)Uninstalling git hooks...$(F_REGULAR)"
 	@git config --unset core.hooksPath
-	@echo -e "$(GREEN)[make] $(YELLOW)Git hooks uninstalled.$(NC)"
+	@echo -e "$(F_MESSAGE)Git hooks uninstalled.$(F_REGULAR)"
 
 # ============================
 # Run a custom command from API or Web folder
 # ============================
 .PHONY: run-api
 run-api:
-	@echo -e "$(GREEN)[make] $(YELLOW)Running command from datashare-api folder: CMD=$(CMD)$(NC)"
+	@echo -e "$(F_MESSAGE)Running command from datashare-api folder: CMD=$(CMD)$(F_REGULAR)"
 	@cd $(API_DIR) && $(CMD)
 
 .PHONY: run-web
 run-web:
-	@echo -e "$(GREEN)[make] $(YELLOW)Running command from datashare-web folder: CMD=$(CMD)$(NC)"
+	@echo -e "$(F_MESSAGE)Running command from datashare-web folder: CMD=$(CMD)$(F_REGULAR)"
 	@cd $(WEB_DIR) && $(CMD)
+
+# ============================
+# Generate documentation (Javadoc / Typedoc)
+# ============================
+.PHONY: doc-api doc-web doc publish-doc
+doc-api:
+	@mkdir -p docs/javadoc
+	@cd datashare-api && ./mvnw javadoc:javadoc
+	@echo -e "$(F_MESSAGE)📚 Javadoc: docs/javadoc/index.html$(F_REGULAR)"
+doc-web:
+	@mkdir -p docs/typedoc
+	@cd datashare-web && npm run typedoc -- --out ../../docs/typedoc
+	@echo -e "$(F_MESSAGE)📚 TypeDoc: docs/typedoc/index.html$(F_REGULAR)"
+doc: doc-api doc-web
+	@echo -e "$(F_MESSAGE)✅ Documentation complète: docs/$(F_REGULAR)"
+publish-doc: doc
+	@git add docs/
+	@git commit -m "docs: update javadoc + typedoc" || echo "Rien à commiter$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE)✅ Docs versionnés Git !$(F_REGULAR)"
