@@ -2,18 +2,15 @@
 spring:
   application:
     name: datashare-api
-  mvc:
-    throw-exception-if-no-handler-found: true 
+  web:
+    error:
+      whitelabel:
+        enabled: false
 security:
   jwt:
     secret: unit-and-it-test-secret-key-32-bytes-min-here-it-is
     expiration: 60
     issuer: ${spring.application.name}
-
-server:
-  error:
-    whitelabel:
-        enabled: false
 
 logging:
   level:
