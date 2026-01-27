@@ -22,28 +22,35 @@ spring:
     error:
       whitelabel:
         enabled: false
-        
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
 server:
   port: ${API_PORT:8080}
+
 security:
   jwt:
     secret: ${JWT_SECRET:your-256-bit-secret-key-here-change-in-prod-32-chars-min}
     expiration: ${JWT_EXPIRATION:900} # default 15 minutes
     issuer: ${spring.application.name}
 
+web-url: http://localhost:${WEB_PORT:4200}
+      
 aws:
   s3:
     endpoint: http://localhost:4566
     region: ${AWS_REGION}
     bucket: ${AWS_S3_BUCKET}
   cors:
-    allowed-origins: http://localhost:${WEB_PORT}
+    allowed-origins: http://localhost:${WEB_PORT:4200}
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "*" 
 
 logging:
   level:

@@ -1,21 +1,31 @@
 package com.datashare.api.configuration;
 
-import com.datashare.api.service.security.CustomUserDetailService;
+import com.datashare.api.security.CsrfCookieFilter;
+import com.datashare.api.security.CustomLogoutHandler;
+import com.datashare.api.security.CustomUserDetailService;
+import com.datashare.api.security.JwtAuthenticationEntryPoint;
+import com.datashare.api.security.JwtAuthenticationFilter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * Spring Security configuration for the application.
@@ -31,7 +41,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  @Autowired private CustomUserDetailService customUserDetailService;
+  @Autowired private final JwtAuthenticationFilter jwtAuthFilter;
+
+  @Autowired private final CustomLogoutHandler logoutHandler;
+
+  @Autowired private final CustomUserDetailService customUserDetailService;
+
+  @Autowired private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+  @Value("${web-url}")
+  private String webUrl;
 
   /**
    * Provides an AuthenticationProvider that delegates to the application's {@link
@@ -82,14 +101,104 @@ public class SecurityConfig {
    */
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
+    // Custom Handler for SPA compatible CSRF
+    CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+    requestHandler.setCsrfRequestAttributeName("_csrf");
+    http
+        // ════════════════════════════════════════════════════
+        // CSRF PROTECTION
+        // ════════════════════════════════════════════════════
+        .csrf(
+            csrf ->
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(requestHandler)
+                    .ignoringRequestMatchers(
+                        // ════════════════════════════════════════════════════
+                        // Public Endpoints without authentification
+                        // ════════════════════════════════════════════════════
+                        "/auth/register",
+                        "/auth/login",
+                        "/auth/logout",
+                        "/actuator/**",
+                        "/files/public/**",
+                        // ════════════════════════════════════════════════════
+                        // GET Endpoints, ready only (safe methods)
+                        // ════════════════════════════════════════════════════
+                        "/auth/me"))
+        // Add filter to send the CSRF token to frontend
+        .addFilterAfter(new CsrfCookieFilter(), LogoutFilter.class)
+
+        // ════════════════════════════════════════════════════
+        // CORS - Centralised Configuration
+        // ════════════════════════════════════════════════════
+        .cors(
+            cors ->
+                cors.configurationSource(
+                    request -> {
+                      var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+                      corsConfig.setAllowedOrigins(List.of(webUrl));
+                      corsConfig.setAllowedMethods(
+                          List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                      corsConfig.setAllowedHeaders(
+                          List.of("*")); // cover all headers (Authorization, Content-Type, etc.)
+                      corsConfig.setAllowCredentials(
+                          true); // CRUCIAL for cookies (AUTH-TOKEN, XSRF-TOKEN)
+                      corsConfig.setMaxAge(
+                          3600L); // cache the responses preflight 1h → good for performance.
+                      return corsConfig;
+                    }))
+
+        // ════════════════════════════════════════════════════
+        // ENDPOINTS AUTORISATION
+        // ════════════════════════════════════════════════════
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/auth/**", "/actuator/**", "/files/public/**")
+                auth
+                    // Public endpoints
+                    .requestMatchers(
+                        "/auth/register",
+                        "/auth/login",
+                        "/auth/logout",
+                        "/actuator/**",
+                        "/files/public/**")
                     .permitAll()
+                    // Other paths need authentification
+                    .requestMatchers("/auth/me")
+                    .authenticated()
                     .anyRequest()
                     .authenticated())
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        // ════════════════════════════════════════════════════
+        // AUTHENTICATION ENTRY POINT
+        // ════════════════════════════════════════════════════
+        .exceptionHandling(
+            exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+        // ════════════════════════════════════════════════════
+        // SESSION MANAGEMENT - Stateless
+        // ════════════════════════════════════════════════════
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+        // ════════════════════════════════════════════════════
+        // LOGOUT HANDLER
+        // ════════════════════════════════════════════════════
+        .logout(
+            logout ->
+                logout
+                    .logoutUrl("/auth/logout")
+                    .addLogoutHandler(logoutHandler)
+                    .logoutSuccessHandler(
+                        (request, response, authentication) -> {
+                          response.setStatus(200);
+                        })
+                    .deleteCookies("AUTH-TOKEN", "XSRF-TOKEN"))
+
+        // ════════════════════════════════════════════════════
+        // JWT FILTERS
+        // ════════════════════════════════════════════════════
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

@@ -1,4 +1,4 @@
-package com.datashare.api.service.security;
+package com.datashare.api.security;
 
 import com.datashare.api.entities.User;
 import com.datashare.api.repository.UserRepository;
@@ -8,13 +8,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-
 /**
  * UserDetailsService implementation that loads user data from the application's {@link
  * com.datashare.api.repository.UserRepository}.
  */
+@Service
+@RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
   private final UserRepository userRepository;

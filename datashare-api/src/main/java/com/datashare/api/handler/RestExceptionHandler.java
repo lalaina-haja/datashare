@@ -1,7 +1,7 @@
 package com.datashare.api.handler;
 
-import com.datashare.api.dto.ApiErrorDto;
-import com.datashare.api.dto.ValidationErrorDto;
+import com.datashare.api.dto.ApiError;
+import com.datashare.api.dto.ValidationError;
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         runtimeException,
-        ApiErrorDto.of(HttpStatus.BAD_REQUEST.value(), runtimeException.getMessage(), request),
+        ApiError.of(HttpStatus.BAD_REQUEST.value(), runtimeException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.BAD_REQUEST,
         request);
@@ -67,7 +67,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         exception,
-        ApiErrorDto.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
+        ApiError.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.NOT_FOUND,
         request);
@@ -84,7 +84,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         exception,
-        ApiErrorDto.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
+        ApiError.of(HttpStatus.NOT_FOUND.value(), exception.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.NOT_FOUND,
         request);
@@ -105,7 +105,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     logError(exception);
 
-    return ResponseEntity.badRequest().body(ValidationErrorDto.of(errors, request));
+    return ResponseEntity.badRequest().body(ValidationError.of(errors, request));
   }
 
   @Override
@@ -118,7 +118,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     logError(exception);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(ApiErrorDto.of(HttpStatus.BAD_REQUEST.value(), "Invalid request content", request));
+        .body(ApiError.of(HttpStatus.BAD_REQUEST.value(), "Invalid request content", request));
   }
 
   /**
@@ -140,8 +140,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         badCredentialsException,
-        ApiErrorDto.of(
-            HttpStatus.UNAUTHORIZED.value(), badCredentialsException.getMessage(), request),
+        ApiError.of(HttpStatus.UNAUTHORIZED.value(), badCredentialsException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.UNAUTHORIZED,
         request);
@@ -165,7 +164,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         accessDeniedException,
-        ApiErrorDto.of(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage(), request),
+        ApiError.of(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage(), request),
         new HttpHeaders(),
         HttpStatus.FORBIDDEN,
         request);
@@ -189,7 +188,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return handleExceptionInternal(
         runtimeException,
-        ApiErrorDto.of(
+        ApiError.of(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             "Internal Server error",
             request.getDescription(false).replace("uri=", "")),

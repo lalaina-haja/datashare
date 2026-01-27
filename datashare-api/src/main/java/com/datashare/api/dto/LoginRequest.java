@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequestDto {
+public class LoginRequest {
 
   /** The user's email address. Must be a valid email format. */
   @NotBlank(message = "Email is required")

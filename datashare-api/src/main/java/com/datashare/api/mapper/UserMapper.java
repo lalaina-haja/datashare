@@ -1,6 +1,6 @@
 package com.datashare.api.mapper;
 
-import com.datashare.api.dto.RegisterRequestDto;
+import com.datashare.api.dto.RegisterRequest;
 import com.datashare.api.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,5 +21,5 @@ public interface UserMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "authorities", ignore = true)
-  User toEntity(RegisterRequestDto dto);
+  User toEntity(RegisterRequest dto);
 }

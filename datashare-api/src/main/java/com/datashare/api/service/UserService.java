@@ -1,15 +1,15 @@
 package com.datashare.api.service;
 
-import com.datashare.api.dto.LoginResponseDto;
-import com.datashare.api.dto.RegisterResponseDto;
+import com.datashare.api.dto.RegisterResponse;
 import com.datashare.api.entities.User;
 import com.datashare.api.repository.UserRepository;
-import com.datashare.api.service.security.JwtService;
+import com.datashare.api.security.JwtService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,7 +37,7 @@ public class UserService {
    * @return the registered user with encoded password
    * @throws IllegalArgumentException if the email is already in use
    */
-  public RegisterResponseDto register(User user) {
+  public RegisterResponse register(User user) {
 
     Assert.notNull(user, "User must not be null");
     log.info("Registering user with email: {}", user.getEmail());
@@ -52,7 +52,7 @@ public class UserService {
     // Save the new user to the repository
     userRepository.save(user);
 
-    return new RegisterResponseDto("User registered successfully", String.valueOf(user.getId()));
+    return new RegisterResponse("User registered successfully", String.valueOf(user.getEmail()));
   }
 
   /**
@@ -63,24 +63,21 @@ public class UserService {
    * @return a JWT token for the authenticated user
    * @throws IllegalArgumentException if the email or password is invalid
    */
-  public LoginResponseDto login(String email, String password) {
+  public String login(String email, String password) {
 
     Assert.notNull(email, "Email must not be null");
     Assert.notNull(password, "Password must not be null");
     log.info("Authenticating user with email: {}", email);
 
-    Optional<User> existingUser = userRepository.findByEmail(email);
-    if (existingUser.isPresent()
-        && passwordEncoder.matches(password, existingUser.get().getPassword())) {
-      UserDetails userDetails =
-          org.springframework.security.core.userdetails.User.builder()
-              .username(existingUser.get().getEmail())
-              .password(existingUser.get().getPassword())
-              .build();
-      String token = jwtService.generateToken(userDetails);
-      return new LoginResponseDto(
-          token, jwtService.getExpiresAt(token), jwtService.getExpiresIn(token));
+    try {
+      UserDetails existingUser = userRepository.loadUserByUsername(email);
+      if (passwordEncoder.matches(password, existingUser.getPassword())) {
+
+        return jwtService.generateToken(existingUser);
+      }
+      throw new IllegalArgumentException("Invalid password");
+    } catch (UsernameNotFoundException exception) {
+      throw new IllegalArgumentException("Invalid email");
     }
-    throw new IllegalArgumentException("Invalid email or password");
   }
 }

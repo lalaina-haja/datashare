@@ -1,9 +1,0 @@
-# Integration test configuration
-# Uses Testcontainers Postgres DB | No real JWT Secret (test secret)
-aws:
-  s3:
-    endpoint: http://localhost:4566
-    region: ${AWS_REGION}
-    bucket: ${AWS_S3_BUCKET}
-  cors:
-    allowed-origins: http://localhost:${WEB_PORT}

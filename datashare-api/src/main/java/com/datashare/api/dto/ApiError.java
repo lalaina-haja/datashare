@@ -1,38 +1,34 @@
 package com.datashare.api.dto;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Data Transfer Object for Validation error responses.
+ * Data Transfer Object for API error responses.
  *
- * <p>Contains details about a validation error that occurred during API request processing,
- * including the HTTP status code, error message, errors, request path, and timestamp.
+ * <p>Contains details about an error that occurred during API request processing, including the
+ * HTTP status code, error message, request path, and timestamp.
+ *
+ * <p>Provides factory methods to easily create instances from various sources.
  *
  * @param status the HTTP status code of the error response
  * @param message the error message describing what went wrong
- * @param errors the list of validation errors
  * @param path the request path that caused the error
  * @param timestamp the date and time when the error occurred
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValidationErrorDto {
+public class ApiError {
 
   /** The HTTP status code of the error response */
   int status;
 
   /** The error message describing what went wrong */
   String message;
-
-  /** List of validation errors */
-  Map<String, String> errors;
 
   /** The request path that caused the error */
   String path;
@@ -46,15 +42,21 @@ public class ValidationErrorDto {
    * @param status the HTTP status code
    * @param message the error message
    * @param path the request path
-   * @param timestamp the error timestamp
-   * @return a new ApiErrorDto instance
+   * @return a new ApiErrorDto instance with current timestamp
    */
-  public static ValidationErrorDto of(Map<String, String> errors, WebRequest request) {
-    return new ValidationErrorDto(
-        HttpStatus.BAD_REQUEST.value(),
-        "Validation failed",
-        errors,
-        request.getDescription(false).replace("uri=", ""),
-        LocalDateTime.now());
+  public static ApiError of(int status, String message, String path) {
+    return new ApiError(status, message, path, LocalDateTime.now());
+  }
+
+  /**
+   * Creates an ApiErrorDto from a WebRequest.
+   *
+   * @param status the HTTP status code
+   * @param message the error message
+   * @param request the WebRequest object
+   * @return a new ApiErrorDto instance with the request URI and current timestamp
+   */
+  public static ApiError of(int status, String message, WebRequest request) {
+    return ApiError.of(status, message, request.getDescription(false).replace("uri=", ""));
   }
 }

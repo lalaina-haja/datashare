@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterResponseDto {
+public class RegisterResponse {
 
   /** A message indicating the result of the registration process. */
   String message;
 
-  /** The unique identifier of the newly created user. */
-  String userId;
+  /** User's email. */
+  String email;
 }

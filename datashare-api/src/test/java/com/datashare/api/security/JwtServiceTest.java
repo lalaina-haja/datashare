@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.datashare.api.service.security.JwtService;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,6 +32,7 @@ public class JwtServiceTest {
   @Mock private Jwt jwt;
 
   private JwtService jwtService;
+  private UserDetails testUser;
 
   private static final String EMAIL = "e@mail.com";
   private static final String PASSWORD = "PASSWORD";
@@ -42,23 +43,19 @@ public class JwtServiceTest {
   @BeforeEach
   public void setUp() {
     jwtService = new JwtService(jwtEncoder, jwtDecoder, EXPIRATION_SECONDS, ISSUER);
-  }
-
-  /**
-   * Tests successful JWT token generation.
-   *
-   * <p>Verifies that when a user ID is provided, the JwtService correctly generates and returns a
-   * JWT token with the expected content.
-   */
-  @Test
-  public void get_token_successful() {
-
-    // GIVEN the user details successfully authenticated
-    UserDetails userDetails =
+    testUser =
         org.springframework.security.core.userdetails.User.builder()
             .username(EMAIL)
             .password(PASSWORD)
             .build();
+  }
+
+  /** Tests successful JWT token generation */
+  @Test
+  @DisplayName("TEST-JWT-001: Should generate token successfully")
+  public void get_token_successful() {
+
+    // GIVEN the user details successfully authenticated
     Instant expiresAt = Instant.now().plusSeconds(EXPIRATION_SECONDS);
     when(jwt.getTokenValue()).thenReturn(TOKEN);
     when(jwt.getExpiresAt()).thenReturn(expiresAt);
@@ -67,7 +64,7 @@ public class JwtServiceTest {
     when(jwtDecoder.decode(any())).thenReturn(jwt);
 
     // WHEN generating a token
-    String returnedToken = jwtService.generateToken(userDetails);
+    String returnedToken = jwtService.generateToken(testUser);
     Instant returnedExpiresAt = jwtService.getExpiresAt(returnedToken);
     Long returnedExpiresIn = jwtService.getExpiresIn(returnedToken);
     String subject = jwtService.extractUsername(returnedToken);
@@ -79,35 +76,29 @@ public class JwtServiceTest {
     assertThat(subject).isEqualTo(EMAIL);
   }
 
+  /** Test that an invalid user throws Exception for Encoding failed */
   @Test
+  @DisplayName("TEST-JWT-002: Should throw exception for encoding failed on invalid user")
   public void get_token_invalid_user_details_throws_exception() {
 
     // GIVEN invalid user details
-    UserDetails userDetails =
-        org.springframework.security.core.userdetails.User.builder()
-            .username(EMAIL)
-            .password(PASSWORD)
-            .build();
     when(jwtEncoder.encode(any())).thenThrow(new RuntimeException("Encoding failed"));
 
     // WHEN generating a token
     Exception exception =
         org.junit.jupiter.api.Assertions.assertThrows(
-            RuntimeException.class, () -> jwtService.generateToken(userDetails));
+            RuntimeException.class, () -> jwtService.generateToken(testUser));
 
     // THEN expect exception thrown with message "Encoding failed"
     assertThat(exception.getMessage()).isEqualTo("Encoding failed");
   }
 
+  /** Test that an expired token is invalid */
   @Test
+  @DisplayName("TEST-JWT-003: Should returns invalid for an expired token")
   public void expired_token_is_invalid() {
 
     // GIVEN an expired token
-    UserDetails userDetails =
-        org.springframework.security.core.userdetails.User.builder()
-            .username(EMAIL)
-            .password(PASSWORD)
-            .build();
     Instant pastTime = Instant.now().minusSeconds(3600);
     when(jwt.getExpiresAt()).thenReturn(pastTime);
     when(jwt.getSubject()).thenReturn(EMAIL);
@@ -115,7 +106,7 @@ public class JwtServiceTest {
 
     // WHEN validating the token
     String token = "EXPIRED_TOKEN";
-    boolean isValid = jwtService.isTokenValid(token, userDetails);
+    boolean isValid = jwtService.isTokenValid(token, testUser);
     boolean isExpired = jwtService.isTokenExpired(token);
 
     // THEN the token is invalid and expired
@@ -123,15 +114,12 @@ public class JwtServiceTest {
     assertThat(isValid).isFalse();
   }
 
+  /** Test that isValid() returns true for a valid token */
   @Test
+  @DisplayName("TEST-JWT-004: Should return valid for valid a token")
   public void valid_token_is_valid() {
 
     // GIVEN a valid token
-    UserDetails userDetails =
-        org.springframework.security.core.userdetails.User.builder()
-            .username(EMAIL)
-            .password(PASSWORD)
-            .build();
     Instant futureTime = Instant.now().plusSeconds(3600);
     when(jwt.getExpiresAt()).thenReturn(futureTime);
     when(jwt.getSubject()).thenReturn(EMAIL);
@@ -139,7 +127,7 @@ public class JwtServiceTest {
 
     // WHEN validating the token
     String token = "VALID_TOKEN";
-    boolean isValid = jwtService.isTokenValid(token, userDetails);
+    boolean isValid = jwtService.isTokenValid(token, testUser);
     boolean isExpired = jwtService.isTokenExpired(token);
 
     // THEN the token is valid and not expired
@@ -147,15 +135,12 @@ public class JwtServiceTest {
     assertThat(isValid).isTrue();
   }
 
+  /** Test that a token with wrong user is invalid */
   @Test
+  @DisplayName("TEST-JWT-005: Should return invalid for wrong user")
   public void token_with_wrong_user_is_invalid() {
 
     // GIVEN a token with a different subject
-    UserDetails userDetails =
-        org.springframework.security.core.userdetails.User.builder()
-            .username(EMAIL)
-            .password(PASSWORD)
-            .build();
     Instant futureTime = Instant.now().plusSeconds(3600);
     when(jwt.getExpiresAt()).thenReturn(futureTime);
     when(jwt.getSubject()).thenReturn("WRONG_USER");
@@ -163,9 +148,28 @@ public class JwtServiceTest {
 
     // WHEN validating the token
     String token = "TOKEN_WITH_WRONG_USER";
-    boolean isValid = jwtService.isTokenValid(token, userDetails);
+    boolean isValid = jwtService.isTokenValid(token, testUser);
 
     // THEN the token is invalid
     assertThat(isValid).isFalse();
+  }
+
+  /** Test that the email is exctracted from the token */
+  @Test
+  @DisplayName("TEST-JWT-006: Should extract email from token")
+  void testExtractUsername() {
+
+    // GIVEN the user details successfully authenticated
+    when(jwt.getTokenValue()).thenReturn(TOKEN);
+    when(jwt.getSubject()).thenReturn(EMAIL);
+    when(jwtEncoder.encode(any())).thenReturn(jwt);
+    when(jwtDecoder.decode(any())).thenReturn(jwt);
+
+    // AND the token
+    String token = jwtService.generateToken(testUser);
+
+    // WHEN extracting the username THEN got email
+    String username = jwtService.extractUsername(token);
+    assertThat(username).isEqualTo(EMAIL);
   }
 }

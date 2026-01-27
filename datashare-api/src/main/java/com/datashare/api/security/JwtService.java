@@ -1,4 +1,4 @@
-package com.datashare.api.service.security;
+package com.datashare.api.security;
 
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;

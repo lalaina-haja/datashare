@@ -1,56 +1,87 @@
 package com.datashare.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-import com.datashare.api.dto.LoginResponseDto;
 import com.datashare.api.entities.User;
 import com.datashare.api.repository.UserRepository;
-import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+/** Integration Test Set for UserService */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
 public class UserServiceIT {
+
+  private User user;
 
   private static final String EMAIL = "name@example.com";
   private static final String PASSWORD = "PASSWORD";
 
-  @MockitoBean private UserRepository userRepository;
-
-  @MockitoBean private PasswordEncoder passwordEncoder;
-
-  @Autowired private Environment environment;
-
   @Autowired private UserService userService;
 
+  @Autowired private UserRepository userRepository;
+
+  /** Reinitialise user repository */
+  @BeforeEach
+  public void setUp() {
+    userRepository.deleteAll();
+    user = new User(null, EMAIL, PASSWORD, null);
+    userService.register(user);
+  }
+
+  /** Test that register an already registered user throws IllegalArgumentException */
   @Test
-  public void login_successful_returns_token() {
+  @DisplayName("INTEG-REGISTER-001: Register existing user throws IllegalArgumentException")
+  public void register_existing_user_throw_IllegalArgumentException() throws Exception {
 
-    // GIVEN the existing user with correct password
-    User user = new User(null, EMAIL, PASSWORD, null);
-    when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
-    when(passwordEncoder.matches(any(), any())).thenReturn(true);
+    // WHEN register with existing user
+    Exception exception =
+        Assertions.assertThrows(IllegalArgumentException.class, () -> userService.register(user));
 
-    // WHEN user logs in
-    LoginResponseDto response = userService.login(EMAIL, PASSWORD);
-    String actualToken = response.getToken();
-    Long actualExpiresIn = response.getExpiresIn();
+    // THEN expect exception thrown with message "Email is already in use: ..."
+    assertThat(exception.getMessage()).isEqualTo("Email is already in use: " + user.getEmail());
+  }
 
-    // THEN
-    assertThat(actualToken).isNotBlank();
-    assertTrue(
-        Math.abs(
-                Long.parseLong(environment.getProperty("security.jwt.expiration"))
-                    - actualExpiresIn)
-            <= 1);
+  /** Test that when a registered user logs in then a token is returned */
+  @Test
+  @DisplayName("INTEG-LOGIN-001: Login successful returns token")
+  public void login_successful_returns_token() throws Exception {
+
+    // WHEN login with existing user
+    String token = userService.login(EMAIL, PASSWORD);
+
+    // THEN a token is generated
+    assertThat(token).isNotBlank();
+  }
+
+  /** Test that a login with inexisting user throws IllegalArgumentException */
+  @Test
+  @DisplayName("INTEG-LOGIN-002: Login with inexisting user throws IllegalArgumentException")
+  public void login_with_inexisting_user_throws_IllegalArgumentException() throws Exception {
+
+    // WHEN login THEN exception thrown
+    Exception exception =
+        Assertions.assertThrows(
+            IllegalArgumentException.class, () -> userService.login("unknown", PASSWORD));
+
+    // AND message is "Invalid email"
+    assertThat(exception.getMessage()).isEqualTo("Invalid email");
+  }
+
+  /** Test that login with wrong password throws IllegalArgumentException */
+  @Test
+  @DisplayName("INTEG-LOGIN-003: Login with wrong password throws IllegalArgumentException")
+  public void login_with_wrong_password_throws_IllegalArgumentException() throws Exception {
+
+    // WHEN login with wrong password THEN exception thrown
+    Exception exception =
+        Assertions.assertThrows(
+            IllegalArgumentException.class, () -> userService.login(EMAIL, "wrong-password"));
+
+    // AND message is "Invalid password"
+    assertThat(exception.getMessage()).isEqualTo("Invalid password");
   }
 }

@@ -7,9 +7,18 @@ API_DIR := datashare-api
 WEB_DIR := datashare-web
 GIT_HOOKS_DIR := scripts/git-hooks
 
+# Load .env if exists
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
+# Default API port
+API_PORT ?= 8080
+
 # Define colors
 COLOR_TITLE    := \033[1;92m # High Intensity Green
-COLOR_KEYWORD  := \033[0;96m # Underlined White
+COLOR_KEYWORD  := \033[0;96m # Cyan
 COLOR_MESSAGE  := \033[1;37m # White
 COLOR_NOCOLOR  := \033[0m  # No Color
 
@@ -18,6 +27,7 @@ F_MESSAGE := $(COLOR_NOCOLOR)[$(COLOR_TITLE)make$(COLOR_NOCOLOR)] $(COLOR_MESSAG
 F_TITLE   := $(COLOR_NOCOLOR)$(COLOR_TITLE)
 F_REGULAR := $(COLOR_NOCOLOR)
 F_KEYWORD := $(COLOR_NOCOLOR)$(COLOR_KEYWORD)
+
 # ============================
 # Help
 # ============================
@@ -117,7 +127,7 @@ start-api:
 .PHONY: start-web
 start-web: install-web
 	@echo -e "$(F_MESSAGE)Starting frontend...$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm install && npm run start
+	@source .env && cd $(WEB_DIR) && npm run start
 
 .PHONY: start-all
 start-all: 
@@ -182,7 +192,7 @@ test-api-unit:
 
 test-api-it:
 	@echo -e "$(F_MESSAGE)Running backend integration tests...$(F_REGULAR)"
-	@cd $(API_DIR) && ./mvnw verify -Pit
+	@cd $(API_DIR) && ./mvnw verify -Pit -Dspring.profiles.active=test
 
 # ============================
 # Combined targets

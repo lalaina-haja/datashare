@@ -7,10 +7,10 @@
  * <p>Key components:
  *
  * <ul>
- *   <li>{@link com.datashare.api.dto.LoginRequestDto} - Login credentials request payload
- *   <li>{@link com.datashare.api.dto.LoginResponseDto} - Login response with JWT token
- *   <li>{@link com.datashare.api.dto.RegisterRequestDto} - Registration credentials request payload
- *   <li>{@link com.datashare.api.dto.RegisterResponseDto} - Registration response with confirmation
+ *   <li>{@link com.datashare.api.dto.LoginRequest} - Login credentials request payload
+ *   <li>{@link com.datashare.api.dto.LoginResponse} - Login response with JWT token
+ *   <li>{@link com.datashare.api.dto.RegisterRequest} - Registration credentials request payload
+ *   <li>{@link com.datashare.api.dto.RegisterResponse} - Registration response with confirmation
  * </ul>
  */
 package com.datashare.api.dto;

@@ -19,7 +19,6 @@
 		<revision>0.1.0</revision>
 		<java.version>21</java.version>
 		<lombok.version>1.18.42</lombok.version>
-		<testcontainers.version>2.0.3</testcontainers.version>
 		<s3.version>2.41.5</s3.version>
 		<mockito.version>5.11.0</mockito.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
@@ -166,16 +165,6 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers-junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers-postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -392,9 +381,6 @@
 		<!-- unit -->
 		<profile>
 			<id>unit</id>
-			<properties>
-				<spring.profiles.active>unit</spring.profiles.active>
-			</properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -412,9 +398,6 @@
 		<!-- it -->
 		<profile>
 			<id>it</id>
-			<properties>
-				<spring.profiles.active>it</spring.profiles.active>
-			</properties>
 			<build>
 				<plugins>
 					<plugin>

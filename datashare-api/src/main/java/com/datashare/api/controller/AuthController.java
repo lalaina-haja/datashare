@@ -1,15 +1,23 @@
 package com.datashare.api.controller;
 
-import com.datashare.api.dto.LoginRequestDto;
-import com.datashare.api.dto.LoginResponseDto;
-import com.datashare.api.dto.RegisterRequestDto;
-import com.datashare.api.dto.RegisterResponseDto;
+import com.datashare.api.dto.LoginRequest;
+import com.datashare.api.dto.LoginResponse;
+import com.datashare.api.dto.RegisterRequest;
+import com.datashare.api.dto.RegisterResponse;
 import com.datashare.api.mapper.UserMapper;
 import com.datashare.api.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.time.Duration;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
   private final UserService userService;
@@ -37,22 +46,51 @@ public class AuthController {
    *     CREATED
    */
   @PostMapping("/register")
-  public ResponseEntity<RegisterResponseDto> register(
-      @Valid @RequestBody RegisterRequestDto requestDto) {
-    RegisterResponseDto response = userService.register(userDtoMapper.toEntity(requestDto));
+  public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest requestDto) {
+    RegisterResponse response = userService.register(userDtoMapper.toEntity(requestDto));
 
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   /**
-   * Authenticate a user and generate a JWT token.
+   * Authenticate a user
    *
-   * @param requestDto the login request containing email and password
+   * @param request the login request containing email and password
    * @return a response entity containing the JWT token and expiration time with status 200 OK
    */
   @PostMapping("/login")
-  public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
-    LoginResponseDto response = userService.login(requestDto.getEmail(), requestDto.getPassword());
-    return ResponseEntity.ok(response);
+  public ResponseEntity<LoginResponse> login(
+      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    log.info("Login attempt for email: {}", request.getEmail());
+    String token = userService.login(request.getEmail(), request.getPassword());
+    ResponseCookie cookie =
+        ResponseCookie.from("AUTH-TOKEN", token)
+            .httpOnly(true) // Inaccessible for JavaScript
+            .secure(true) // HTTPS only
+            .sameSite("Strict") // Protection CSRF
+            .path("/") // Valid for all the app
+            .maxAge(Duration.ofDays(7)) // 7 jours
+            .build();
+    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    log.info("User {} logged in successfully", request.getEmail());
+    log.debug("Cookie created: {}", cookie.toString());
+    return ResponseEntity.ok(new LoginResponse("Login successful", request.getEmail()));
+  }
+
+  /**
+   * Gets the current user
+   *
+   * @param userDetails
+   * @return
+   */
+  @GetMapping("/me")
+  public ResponseEntity<?> getCurrentUser(
+      @org.springframework.security.core.annotation.AuthenticationPrincipal
+          UserDetails userDetails) {
+
+    return ResponseEntity.ok(
+        Map.of(
+            "email", userDetails.getUsername(),
+            "authorities", userDetails.getAuthorities()));
   }
 }
