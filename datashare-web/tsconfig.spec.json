@@ -1,20 +1,29 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2022",
-    "outDir": "./out-tsc/spec",
-    "types": [
-      "vitest/globals",
-      "node",
-      "jest",
-      "@playwright/test"
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./out-tsc/spec",
+        "types": [
+            "vitest",
+            "vite/client",
+            "node",
+            "jsdom"
+        ],
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true
+    },
+    "include": [
+        "src/test/**/*.ts",
+        "src/test/unit/**/*.ts",
+        "src/test/integration/**/*.ts",
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts",
+        "src/**/*.d.ts"
+    ],
+    "files": [
+        "config/vitest.setup.ts"
     ]
-  },
-  "include": [
-    "src/**/*.d.ts",
-    "src/**/*.spec.ts"
-  ]
 }

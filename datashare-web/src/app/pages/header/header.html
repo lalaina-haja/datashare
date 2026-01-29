@@ -1,0 +1,18 @@
+<mat-toolbar color="primary" class="header">
+  <div class="logo">
+    <span>DataShare</span>
+  </div>
+  <span class="spacer"></span>
+
+  @if (authService.isAuthenticated()) {
+    <mat-icon>account_circle</mat-icon>
+    <span class="user">{{ authService.currentUser()?.email }}</span>
+    <button mat-raised-button color="accent" class="btn-connecter" (click)="logout()">
+      Se deconnecter
+    </button>
+  } @else {
+    <button mat-raised-button color="accent" class="btn-connecter" routerLink="/login">
+      Se connecter
+    </button>
+  }
+</mat-toolbar>

@@ -1,0 +1,20 @@
+{
+  "stepDefinitions": [
+    "src/test/e2e/steps/**/*.{js,ts}",
+    "src/test/e2e/steps/*.{js,ts}"
+  ],
+  "messages": {
+    "enabled": true,
+    "output": "cucumber-messages.ndjson"
+  },
+  "json": {
+    "enabled": true,
+    "output": "cypress/reports/cucumber-report.json"
+  },
+  "html": {
+    "enabled": true,
+    "output": "cypress/reports/cucumber-report.html"
+  },
+  "filterSpecs": true,
+  "omitFiltered": true
+}

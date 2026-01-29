@@ -1,0 +1,210 @@
+.login-card {
+  background: #ffffff !important;
+  border-radius: 0 0 24px 24px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 15px !important;
+  overflow: hidden;
+  padding: 0;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Titre dans header */
+.title-section {
+  text-align: center;
+  padding: 2.5rem 2rem 1rem;
+}
+
+mat-card-title {
+  padding: 0;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  color: #222020;
+  margin: 0 !important;
+  width: 100%;
+}
+
+.buttons-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-primary {
+  background: #ffeae2 !important;
+  color: #f37d1c !important;
+  border: 1px solid #f37d1c !important;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.btn-secondary {
+  color: #f37d1c !important;
+  border-radius: 12px;
+}
+
+/* MAT-CARD-HEADER CENTRÉ + TRANSPARENT */
+mat-card-header {
+  background: transparent !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 2rem 2rem 1rem !important;
+  text-align: center !important;
+}
+
+/* Contenu mat-card-header-text */
+::ng-deep .mat-mdc-card-header-text {
+  width: 100% !important;
+  margin-left: 0 !important;
+  text-align: center !important;
+}
+
+/* Formulaire reste blanc */
+.form-section {
+  background: #ffffff !important;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Focus orange */
+.mat-mdc-form-field.mat-focused .mdc-notched-outline {
+  border-color: #ff9800 !important;
+}
+
+/* Bouton eye discret */
+mat-icon {
+  color: #666;
+}
+
+/* Bordure des conteneurs */
+::ng-deep .mdc-notched-outline {
+  border: 1px solid #8d8b8b !important;
+  background: transparent !important;
+  border-radius: 12px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+::ng-deep .mdc-notched-outline * {
+  border: none !important;
+}
+
+/* Espace à l'intérieur des conteneurs */
+::ng-deep .mat-mdc-form-field-infix {
+  padding: 24px 0 0 16px !important;
+}
+
+/* PLACEHOLDER */
+::ng-deep .mdc-text-field__input::placeholder {
+  color: #8d8b8b !important;
+}
+
+::ng-deep .mdc-text-field__input::-webkit-input-placeholder {
+  color: #8d8b8b !important;
+}
+
+::ng-deep .mdc-text-field__input::-moz-placeholder {
+  color: #8d8b8b !important;
+}
+
+::ng-deep .mdc-text-field__input:-ms-input-placeholder {
+  color: #8d8b8b !important;
+}
+
+::ng-deep .mdc-text-field__input:focus::placeholder {
+  color: #8d8b8b !important;
+}
+
+/* ICÔNES ALIGNÉES VERTICALEMENT */
+::ng-deep .mat-mdc-form-field-icon-prefix,
+::ng-deep .mat-mdc-form-field-icon-suffix {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  margin-top: 0 !important;
+}
+
+/* Position icône par rapport au texte */
+::ng-deep .mdc-text-field--with-suffix-icon .mdc-text-field__input {
+  padding-right: 12px !important;
+  /* Espace pour icône */
+}
+
+/* Bouton eye parfaitement centré */
+::ng-deep .mat-mdc-icon-button {
+  margin: 14px !important;
+  line-height: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  vertical-align: middle !important;
+}
+
+/* Icône même taille que padding input */
+::ng-deep .mat-mdc-form-field-icon-suffix .mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+}
+
+/* Boutons Créer un compte et Connexion */
+.login-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  width: 100%;
+}
+
+.btn-creer-compte {
+  border: none !important;
+  color: #b65a2c !important;
+  text-transform: none !important;
+  font-weight: 400 !important;
+  width: 100%;
+  height: 56px;
+}
+
+.btn-connexion {
+  background: #f5cfbc !important;
+  color: #b65a2c !important;
+  border-radius: 12px !important;
+  border: 1px solid #b65a2c !important;
+  text-transform: none !important;
+  font-weight: 400 !important;
+  width: 100%;
+}
+
+.btn-connexion:hover {
+  box-shadow: 0 0 24px #bba79b !important;
+}
+
+/* MAT-ERROR ROUGE + PETIT */
+::ng-deep .mat-mdc-form-field-error-wrapper {
+  color: #f44336 !important;
+  /* ✅ Rouge Material */
+  font-size: 0.75rem !important;
+  /* ✅ Plus petit (12px) */
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  margin-top: 4px !important;
+}
+
+/* Texte erreur spécifique */
+::ng-deep .mat-mdc-form-field-error {
+  color: #f44336 !important;
+  font-size: 0.75rem !important;
+  /* ✅ 12px petit */
+  padding: 2px 0 !important;
+}
+
+/* Focus erreur - bordure rouge */
+::ng-deep .mat-mdc-form-field.mat-mdc-form-field-error .mdc-notched-outline {
+  border-color: #f44336 !important;
+}

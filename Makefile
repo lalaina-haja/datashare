@@ -54,16 +54,16 @@ help:
 	@echo -e "$(F_KEYWORD)   make lint-web             $(F_REGULAR)Run Web lint (Angular Lint / Prettier)"
 	@echo -e "$(F_KEYWORD)   make lint                 $(F_REGULAR)Run all lint checks (API + Web)"
 	@echo ""
-	@echo -e "$(F_TITLE)API Tests (Maven profiles):"
+	@echo -e "$(F_TITLE)API Tests (Maven Surefire / Failsafe):"
 	@echo -e "$(F_KEYWORD)   make test-api-unit        $(F_REGULAR)Run API unit tests"
 	@echo -e "$(F_KEYWORD)   make test-api-it          $(F_REGULAR)Run API integration tests "
 	@echo ""
-	@echo -e "$(F_TITLE)Web Tests (Jest / Playwright):"
+	@echo -e "$(F_TITLE)Web Tests (Vitest):"
 	@echo -e "$(F_KEYWORD)   make test-web-unit        $(F_REGULAR)Run Web unit tests"
 	@echo -e "$(F_KEYWORD)   make test-web-it          $(F_REGULAR)Run Web integration tests"
 	@echo ""
-	@echo -e "$(F_TITLE)End to end Tests:"
-	@echo -e "$(F_KEYWORD)   make test-e2e             $(F_REGULAR)Run end-to-end tests (Playwright / Cypress)"
+	@echo -e "$(F_TITLE)End to end Tests (Cypress):"
+	@echo -e "$(F_KEYWORD)   make test-e2e             $(F_REGULAR)Run end-to-end tests"
 	@echo ""
 	@echo -e "$(F_TITLE)Combined Test Targets:"
 	@echo -e "$(F_KEYWORD)   make test-unit            $(F_REGULAR)Run all unit tests (API + Web)"
@@ -106,7 +106,7 @@ ifndef TYPE
 endif
 	@echo -e "$(F_MESSAGE)Bumping version ($(TYPE))...$(F_REGULAR)"
 	$(BUMP_SCRIPT) $(TYPE)
-	@echo -e "$(F_MESSAGE)New version: $$(cat $(VERSION_FILE))$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ New version: $$(cat $(VERSION_FILE))$(F_REGULAR)"
 
 # ============================
 # Web dependencies
@@ -121,8 +121,11 @@ install-web:
 # ============================
 .PHONY: start-api
 start-api: 
-	@echo -e "$(F_MESSAGE)Starting backend...$(F_REGULAR)"
-	@cd $(API_DIR) && ./mvnw spring-boot:run
+	@if nc -z localhost $(API_PORT); then \
+		echo -e "$(F_MESSAGE)Backend is already running.$(F_REGULAR)"; \
+	else \
+		( echo -e "$(F_MESSAGE)Starting backend...$(F_REGULAR)"; cd $(API_DIR) && ./mvnw spring-boot:run ) \
+	fi
 
 .PHONY: start-web
 start-web: install-web
@@ -141,14 +144,14 @@ start-all:
 .PHONY: lint-web lint-api lint
 lint-web: install-web
 	@echo -e "$(F_MESSAGE)Running datashare-web lint (Lint / Prettier)...$(F_REGULAR)"	
-	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo -e "$(F_MESSAGE)    ⚠️ Lint warnings tolérés$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm run prettier:check || (npm run prettier && echo -e "$(F_MESSAGE)    → Prettier fixé$(F_REGULAR)")
+	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo -e "$(F_MESSAGE) Lint warnings tolerated$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run format:check || (npm run format && echo -e "$(F_MESSAGE) ✔ Prettier fixed$(F_REGULAR)")
 lint-api:
 	@echo -e "$(F_MESSAGE)Running datashare-api lint (Compile / Spotless / Checkstyle)...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw compile -DskipTests -q
-	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && echo -e "$(F_MESSAGE)Spotless fixed ✅$(F_REGULAR)")
+	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && echo -e "$(F_MESSAGE) ✔ Spotless fixed$(F_REGULAR)")
 lint: lint-api lint-web
-	@echo -e "$(F_MESSAGE)All lint checks completed.$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ All lint checks completed.$(F_REGULAR)"
 
 # ============================
 # Building (Angular / Maven)
@@ -163,27 +166,10 @@ build-api:
 	@cd $(API_DIR) && ./mvnw clean package -DskipTests
 
 build-all: build-api build-web
-	@echo -e "$(F_MESSAGE)All applications built successfully.$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ All applications built successfully.$(F_REGULAR)"
 
 # ============================
-# Frontend tests (Jest / Playwright)
-# ============================
-.PHONY: test-web-unit test-web-it test-web-e2e
-test-web-unit: install-web
-	@echo -e "$(F_MESSAGE)Running frontend unit tests...$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm run test-unit 
-
-test-web-it: install-web
-	@echo -e "$(F_MESSAGE)Running frontend integration tests...$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm run test-it
-
-test-web-e2e: install-web
-	@echo -e "$(F_MESSAGE)Running frontend end-to-end tests...$(F_REGULAR)"
-	$(MAKE) start-api &
-	@cd $(WEB_DIR) && npm run test-e2e  
-
-# ============================
-# Backend tests (Maven)
+# Backend tests (Maven Surefire / Failsafe)
 # ============================
 .PHONY: test-api-unit test-api-it test-api-e2e
 test-api-unit:
@@ -195,18 +181,40 @@ test-api-it:
 	@cd $(API_DIR) && ./mvnw verify -Pit -Dspring.profiles.active=test
 
 # ============================
+# Frontend tests (Vitest)
+# ============================
+.PHONY: test-web-unit test-web-it
+test-web-unit: install-web
+	@echo -e "$(F_MESSAGE)Running frontend unit tests...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:unit 
+
+test-web-it: install-web
+	@echo -e "$(F_MESSAGE)Running frontend integration tests...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:integration
+
+# ============================
+# End to End tests (Cypress)
+# ============================
+.PHONY: test-e2e
+test-e2e: 
+	$(MAKE) start-api &
+	@echo -e "$(F_MESSAGE)Running end-to-end tests...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:e2e:headless  
+
+# ============================
 # Combined targets
 # ============================
 .PHONY: test-unit
 test-unit: test-api-unit test-web-unit
-	@echo -e "$(F_MESSAGE)All unit tests finished.$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ All unit tests finished.$(F_REGULAR)"
 
 .PHONY: test-it
 test-it: test-api-it test-web-it
-	@echo -e "$(F_MESSAGE)All integration tests finished.$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ All integration tests finished.$(F_REGULAR)"
+
 .PHONY: test-all
 test-all: test-unit test-it test-e2e
-	@echo -e "$(F_MESSAGE)All tests finished.$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE) ✔ All tests finished.$(F_REGULAR)"
 
 # ============================
 # Git hooks

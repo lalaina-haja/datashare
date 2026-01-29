@@ -1,0 +1,60 @@
+<main class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Connexion</mat-card-title>
+    </mat-card-header>
+
+    @if (message(); as errorMessage) {
+      <mat-label class="error-message">{{ errorMessage }}</mat-label>
+    }
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- EMAIL - Contour + label classique -->
+        <mat-label>Email</mat-label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="Saisissez votre email..."
+            required
+          />
+        </mat-form-field>
+
+        <!-- PASSWORD - Contour + label classique -->
+        <mat-label>Mot de passe</mat-label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input
+            matInput
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Saisissez votre mot de passe"
+            required
+          />
+          <button mat-icon-button matSuffix (click)="showPassword = !showPassword" type="button">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div class="login-actions">
+          <a mat-button routerLink="/register" class="btn-creer-compte">Créer un compte</a>
+
+          <button
+            mat-raised-button
+            color="btn-orange-mauve"
+            class="btn-connexion"
+            type="submit"
+            [disabled]="loginForm.invalid || loading"
+          >
+            @if (loading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              Connexion
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</main>

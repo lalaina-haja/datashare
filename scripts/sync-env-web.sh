@@ -34,7 +34,7 @@ echo -e "${TAG} Updating environment.dev.ts"
 echo -e "${TAG}   WEB_PORT=${KEYWORD}$WEB_PORT${NC}"
 echo -e "${TAG}   API_PORT=${KEYWORD}$API_PORT${NC}"
 
-# Replace apiUrl and baseUrl in environment.local.ts
+# Replace apiUrl and baseUrl in environment.dev.ts
 sed -E \
   -e "s|apiUrl: *'[^']*'|apiUrl: 'http://localhost:${API_PORT}'|" \
   -e "s|baseUrl: *'[^']*'|baseUrl: 'http://localhost:${WEB_PORT}'|" \
