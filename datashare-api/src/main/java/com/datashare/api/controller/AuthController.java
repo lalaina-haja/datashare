@@ -74,7 +74,11 @@ public class AuthController {
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     log.info("User {} logged in successfully", request.getEmail());
     log.debug("Cookie created: {}", cookie.toString());
-    return ResponseEntity.ok(new LoginResponse("Login successful", request.getEmail()));
+    return ResponseEntity.ok(
+        new LoginResponse(
+            "Login successful",
+            request.getEmail(),
+            userService.getAuthorities(request.getEmail())));
   }
 
   /**

@@ -5,6 +5,7 @@ import com.datashare.api.entities.User;
 import com.datashare.api.repository.UserRepository;
 import com.datashare.api.security.JwtService;
 import jakarta.transaction.Transactional;
+import java.util.Collection;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,8 @@ public class UserService {
     // Save the new user to the repository
     userRepository.save(user);
 
-    return new RegisterResponse("User registered successfully", String.valueOf(user.getEmail()));
+    return new RegisterResponse(
+        "User registered successfully", String.valueOf(user.getEmail()), user.getAuthorities());
   }
 
   /**
@@ -79,5 +81,16 @@ public class UserService {
     } catch (UsernameNotFoundException exception) {
       throw new IllegalArgumentException("Invalid email");
     }
+  }
+
+  /**
+   * Get the user authorities
+   *
+   * @param email the user's email. Must not be null
+   * @return the user's authorities
+   */
+  public Collection<?> getAuthorities(String email) {
+    Assert.notNull(email, "Email must not be null");
+    return userRepository.loadUserByUsername(email).getAuthorities();
   }
 }

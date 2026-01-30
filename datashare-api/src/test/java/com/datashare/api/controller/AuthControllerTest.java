@@ -45,7 +45,7 @@ public class AuthControllerTest {
   void setUp() {
     validRegisterRequest = new RegisterRequest("test@example.com", "ValidPass123!");
     validLoginRequest = new LoginRequest("test@example.com", "ValidPass123!");
-    registerResponse = new RegisterResponse("User registered successfully", "1");
+    registerResponse = new RegisterResponse("User registered successfully", "1", null);
     testUser = new User(1L, "test@example.com", "hashedPassword", null);
     response = new MockHttpServletResponse();
   }

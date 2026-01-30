@@ -1,5 +1,6 @@
 package com.datashare.api.dto;
 
+import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,7 @@ public class RegisterResponse {
 
   /** User's email. */
   String email;
+
+  /** User authorities */
+  Collection<?> authorities;
 }
