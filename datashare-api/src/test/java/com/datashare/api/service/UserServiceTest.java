@@ -45,7 +45,7 @@ public class UserServiceTest {
 
   /** Test that registering a null user throws IllegalArgumentException. */
   @Test
-  @DisplayName("TEST-REGISTER-001: Register null user throws IllegalArgumentException")
+  @DisplayName("UNIT-REGISTER-001: Register null user throws IllegalArgumentException")
   public void register_null_user_throws_IllegalArgumentException() throws Exception {
 
     // WHEN register with null user
@@ -60,7 +60,7 @@ public class UserServiceTest {
    * Test that registering a user with an already existing email throws IllegalArgumentException.
    */
   @Test
-  @DisplayName("TEST-REGISTER-002: Register already existing user throws IllegalArgumentException")
+  @DisplayName("UNIT-REGISTER-002: Register already existing user throws IllegalArgumentException")
   public void register_already_existing_user_throws_IllegalArgumentException() throws Exception {
 
     // GIVEN the existing user
@@ -77,14 +77,15 @@ public class UserServiceTest {
 
   /** Test that registering a new user successfully encodes the password and saves the user. */
   @Test
-  @DisplayName("TEST-REGISTER-003: Register user successful")
+  @DisplayName("UNIT-REGISTER-003: Register user successful")
   public void register_user_successful() throws Exception {
 
     // GIVEN the user does not exist
     User user = new User(null, EMAIL, PASSWORD, null);
     when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
     when(passwordEncoder.encode(anyString())).thenReturn(PASSWORD);
-    // when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    // when(userRepository.save(any())).thenAnswer(invocation ->
+    // invocation.getArgument(0));
 
     // WHEN registering the user
     RegisterResponse response = userService.register(user);
@@ -103,7 +104,7 @@ public class UserServiceTest {
    * @param missing the field that is missing ("email" or "password")
    */
   @ParameterizedTest(
-      name = "TEST-LOGIN-001: login with missing {0} field throws IllegalArgumentException")
+      name = "UNIT-LOGIN-001: login with missing {0} field throws IllegalArgumentException")
   @ValueSource(strings = {"email", "password"})
   public void login_with_missing_field_throws_IllegalArgumentException(String missing)
       throws Exception {
@@ -124,7 +125,7 @@ public class UserServiceTest {
 
   /** Test that logging in with an unknown email throws IllegalArgumentException. */
   @Test
-  @DisplayName("TEST-LOGIN-002: Login with unknow user throws IllegalArgumentException")
+  @DisplayName("UNIT-LOGIN-002: Login with unknow user throws IllegalArgumentException")
   public void login_unknown_user_throws_IllegalArgumentException() throws Exception {
 
     // GIVEN unknown user
@@ -141,7 +142,7 @@ public class UserServiceTest {
 
   /** Test that logging in with a wrong password throws IllegalArgumentException. */
   @Test
-  @DisplayName("TEST-LOGIN-003: Login wrong password throws IllegalArgumentException")
+  @DisplayName("UNIT-LOGIN-003: Login wrong password throws IllegalArgumentException")
   public void login_wrong_password_throws_IllegalArgumentException() throws Exception {
 
     // GIVEN user exists and a wrong password
@@ -161,7 +162,7 @@ public class UserServiceTest {
 
   /** Test that logging in with correct credentials successfully returns a JWT token. */
   @Test
-  @DisplayName("TEST-LOGIN-004: Login successful returns token")
+  @DisplayName("UNIT-LOGIN-004: Login successful returns token")
   public void login_successful_returns_token() throws Exception {
     // GIVEN correct login and password
     User user = new User(null, EMAIL, PASSWORD, null);

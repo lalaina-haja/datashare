@@ -57,7 +57,7 @@ public class JwtAuthenticationFilterTest {
 
   /** Test that with a valid token, the context is authenticated */
   @Test
-  @DisplayName("TEST-JWT-FILTER-001: Should authenticate valid JWT token")
+  @DisplayName("UNIT-JWT-FILTER-001: Should authenticate valid JWT token")
   void testValidJwtAuthentication() throws ServletException, IOException {
 
     // GIVEN cookie with valid token
@@ -84,7 +84,7 @@ public class JwtAuthenticationFilterTest {
 
   /** Test that without AUTH token the context is ignored */
   @Test
-  @DisplayName("TEST-JWT-FILTER-002: Should ignore if no cookie AUTH-TOKEN")
+  @DisplayName("UNIT-JWT-FILTER-002: Should ignore if no cookie AUTH-TOKEN")
   void testNoCookiePresent() throws ServletException, IOException {
 
     // GIVEN no cookies
@@ -103,7 +103,7 @@ public class JwtAuthenticationFilterTest {
   /** Test that the context is rejected if isTokenValid returns false */
   @Test
   @DisplayName(
-      "TEST-JWT-FILTER-003: Devrait rejeter si token valide mais isTokenValid retourne false")
+      "UNIT-JWT-FILTER-003: Devrait rejeter si token valide mais isTokenValid retourne false")
   void testTokenNotValidForUser() throws ServletException, IOException {
 
     // GIVEN an AUTH-TOKEN cookie
@@ -126,7 +126,7 @@ public class JwtAuthenticationFilterTest {
 
   /** Test that the filter can handle inexisting user */
   @Test
-  @DisplayName("TEST-JWT-FILTER-004: Should handle inexisting user")
+  @DisplayName("UNIT-JWT-FILTER-004: Should handle inexisting user")
   void testUserNotFound() throws ServletException, IOException {
 
     // GIVEN the valid AUTH token cookie
@@ -150,7 +150,7 @@ public class JwtAuthenticationFilterTest {
 
   /** Test that the filter can handle multiple cookies */
   @Test
-  @DisplayName("TEST-JWT-FILTER-005: Should handle multiple cookies including AUTH-TOKEN")
+  @DisplayName("UNIT-JWT-FILTER-005: Should handle multiple cookies including AUTH-TOKEN")
   void testMultipleCookies() throws ServletException, IOException {
 
     // GIVEN the cookies

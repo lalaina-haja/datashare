@@ -18,7 +18,7 @@ spring:
     open-in-view: false
   web:
     resources:
-        add-mappings: false
+      add-mappings: false
     error:
       whitelabel:
         enabled: false
@@ -29,7 +29,7 @@ spring:
 
 server:
   port: ${API_PORT:8080}
-
+  
 security:
   jwt:
     secret: ${JWT_SECRET:your-256-bit-secret-key-here-change-in-prod-32-chars-min}

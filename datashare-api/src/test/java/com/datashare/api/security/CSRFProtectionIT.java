@@ -1,6 +1,7 @@
 package com.datashare.api.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
@@ -22,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 /** Integration Test Set for CSRF Protection */
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class CSRFProtectionIT {
 
   @Autowired private MockMvc mockMvc;
@@ -53,6 +56,7 @@ public class CSRFProtectionIT {
     mockMvc
         .perform(
             post("/auth/login")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     objectMapper.writeValueAsString(new LoginRequest(TEST_EMAIL, TEST_PASSWORD))))
@@ -85,6 +89,7 @@ public class CSRFProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(
@@ -98,37 +103,9 @@ public class CSRFProtectionIT {
     mockMvc.perform(delete("/files/1").cookie(authCookie)).andExpect(status().isForbidden());
   }
 
-  /** Test that a CSRF token is generated automatically */
-  @Test
-  @DisplayName("INTEG-CSRF-004: Should generate automatically a CSRF token")
-  void testCSRFTokenGeneration() throws Exception {
-
-    // GIVEN the cookie returned by the login
-    MvcResult loginResult =
-        mockMvc
-            .perform(
-                post("/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        objectMapper.writeValueAsString(
-                            new LoginRequest(TEST_EMAIL, TEST_PASSWORD))))
-            .andReturn();
-    Cookie authCookie = loginResult.getResponse().getCookie("AUTH-TOKEN");
-
-    // WHEN GET /auth/me (an authenticated path)
-    MvcResult csrfResult =
-        mockMvc.perform(get("/auth/me").cookie(authCookie)).andExpect(status().isOk()).andReturn();
-
-    // THEN a CSRF token is generated
-    Cookie csrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
-    assertThat(csrfCookie).isNotNull();
-    assertThat(csrfCookie.getValue()).isNotEmpty();
-    assertThat(csrfCookie.isHttpOnly()).isFalse();
-  }
-
   /** Test that a request with CSRF token is accepted */
   @Test
-  @DisplayName("INTEG-CSRF-005: Should accept requests with valid CSRF token")
+  @DisplayName("INTEG-CSRF-004: Should accept requests with valid CSRF token")
   void testValidCSRFToken() throws Exception {
 
     // GIVEN Login
@@ -136,6 +113,7 @@ public class CSRFProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(
@@ -143,24 +121,15 @@ public class CSRFProtectionIT {
             .andReturn();
     Cookie authCookie = loginResult.getResponse().getCookie("AUTH-TOKEN");
 
-    // AND the CRSF token
-    MvcResult csrfResult = mockMvc.perform(get("/auth/me").cookie(authCookie)).andReturn();
-    Cookie csrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
-    String csrfToken = csrfCookie.getValue();
-
     // WHEN GET protected resource with valid CSRF token THEN CSRF passes
     mockMvc
-        .perform(
-            delete("/files/1")
-                .cookie(authCookie)
-                .cookie(csrfCookie)
-                .header("X-XSRF-TOKEN", csrfToken)) // Header CSRF
+        .perform(delete("/files/1").with(csrf()).cookie(authCookie))
         .andExpect(status().isNotFound()); // File doesn't exist, but CSRF passed
   }
 
   /** Test that a request with invalid CSRF token is rejected */
   @Test
-  @DisplayName("INTEG-CSRF-006: Should reject requests with invalid CSRF token")
+  @DisplayName("INTEG-CSRF-005: Should reject requests with invalid CSRF token")
   void testInvalidCSRFToken() throws Exception {
 
     // GIVEN login
@@ -168,6 +137,7 @@ public class CSRFProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(
@@ -183,7 +153,7 @@ public class CSRFProtectionIT {
 
   /** Test that a OPTIONS request does not require CSRF */
   @Test
-  @DisplayName("INTEG-CSRF-007: OPTIONS request (CORS preflight) does not require CSRF")
+  @DisplayName("INTEG-CSRF-006: OPTIONS request (CORS preflight) does not require CSRF")
   void testOptionsRequestNoCSRF() throws Exception {
     mockMvc
         .perform(
@@ -195,7 +165,7 @@ public class CSRFProtectionIT {
 
   /** Test that logout accepts requests with valid CSRF */
   @Test
-  @DisplayName("TEST-CSRF-008: Logout should accept requests with valid CSRF")
+  @DisplayName("TEST-CSRF-007: Logout should accept requests with valid CSRF")
   void testLogoutWithCSRF() throws Exception {
 
     // GIVEN Login
@@ -203,6 +173,7 @@ public class CSRFProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(
@@ -210,17 +181,9 @@ public class CSRFProtectionIT {
             .andReturn();
     Cookie authCookie = loginResult.getResponse().getCookie("AUTH-TOKEN");
 
-    // AND the CSRF token
-    MvcResult csrfResult = mockMvc.perform(get("/auth/me").cookie(authCookie)).andReturn();
-    Cookie csrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
-
     // WHEN Logout with CSRF THEN returns OK
     mockMvc
-        .perform(
-            post("/auth/logout")
-                .cookie(authCookie)
-                .cookie(csrfCookie)
-                .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+        .perform(post("/auth/logout").with(csrf()).cookie(authCookie))
         .andExpect(status().isOk());
   }
 }

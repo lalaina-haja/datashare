@@ -1,6 +1,7 @@
 package com.datashare.api.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -17,15 +18,17 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Integration Test Set for Cookie and token */
 @SpringBootTest
 @AutoConfigureMockMvc
 @WithMockUser
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 public class CookieSecurityIT {
 
   /** Test email address used for registration */
@@ -38,7 +41,7 @@ public class CookieSecurityIT {
   @Autowired private MockMvc mockMvc;
 
   /** ObjectMapper for JSON serialization/deserialization */
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JsonMapper jsonMapper;
 
   /** Create existing user */
   @BeforeEach
@@ -46,7 +49,7 @@ public class CookieSecurityIT {
     mockMvc.perform(
         post("/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(new User(null, EMAIL, PASSWORD, null))));
+            .content(jsonMapper.writeValueAsString(new User(null, EMAIL, PASSWORD, null))));
   }
 
   /** Test that successful login returns a HttpOnly cookie */
@@ -62,8 +65,9 @@ public class CookieSecurityIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(loginRequest)))
+                    .content(jsonMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -90,8 +94,9 @@ public class CookieSecurityIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(loginRequest)))
+                    .content(jsonMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -120,8 +125,9 @@ public class CookieSecurityIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(loginRequest)))
+                    .content(jsonMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
     Cookie authCookie = loginResult.getResponse().getCookie("AUTH-TOKEN");

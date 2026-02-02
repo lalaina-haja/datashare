@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.datashare.api.dto.RegisterRequest;
 import com.datashare.api.entities.User;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /** Unit Test Set for UserMapper */
@@ -15,6 +16,7 @@ public class UserMapperTest {
 
   /** Test that the user is correctly mapped */
   @Test
+  @DisplayName("UNIT-MAPPER-001: Should map DTO to User")
   void shouldMapDtoToUser() {
     RegisterRequest dto = new RegisterRequest("jane@example.com", "PASSWORD");
 
@@ -27,6 +29,7 @@ public class UserMapperTest {
 
   /** Test that null is returned for null user */
   @Test
+  @DisplayName("UNIT-MAPPER-002: Should handle Null User")
   void shouldHandleNullUser() {
     assertThat(userMapper.toEntity(null)).isNull();
     ;

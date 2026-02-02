@@ -1,6 +1,7 @@
 package com.datashare.api.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -14,18 +15,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test set for XSS protection */
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class XSSProtectionIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JsonMapper jsonMapper;
 
   /** Test that emails with malicious script */
   @ParameterizedTest
@@ -53,7 +56,7 @@ public class XSSProtectionIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").exists());
   }
@@ -64,14 +67,14 @@ public class XSSProtectionIT {
   void testCookieNotAccessibleToJavaScript() throws Exception {
 
     // GIVEN the request payload
-    RegisterRequest registerRequest = new RegisterRequest("test@example.com", "ValidPass123!");
+    RegisterRequest registerRequest = new RegisterRequest("testxss@example.com", "ValidPass123!");
 
     // WHEN POST /auth/register
     mockMvc
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
+                .content(jsonMapper.writeValueAsString(registerRequest)))
         .andExpect(status().isCreated());
 
     // AND POST /auth/login
@@ -79,8 +82,9 @@ public class XSSProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(registerRequest)))
+                    .content(jsonMapper.writeValueAsString(registerRequest)))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -104,7 +108,7 @@ public class XSSProtectionIT {
                 post("/auth/register")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             new RegisterRequest(emailWithHTML, "ValidPass123!"))))
             .andExpect(status().isBadRequest())
             .andReturn();
@@ -127,7 +131,7 @@ public class XSSProtectionIT {
                 post("/auth/login")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             new LoginRequest("test@test.com", "ValidPass123!"))))
             .andReturn();
 
@@ -148,9 +152,10 @@ public class XSSProtectionIT {
         mockMvc
             .perform(
                 post("/auth/login")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             new LoginRequest("test@test.com", "ValidPass123!"))))
             .andReturn();
 
@@ -182,7 +187,7 @@ public class XSSProtectionIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.email").value("Invalid email format"));
   }
@@ -205,7 +210,7 @@ public class XSSProtectionIT {
           .perform(
               post("/auth/register")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(request)))
+                  .content(jsonMapper.writeValueAsString(request)))
           .andDo(
               mvcResult -> {
                 System.out.println("Valid email accepted: " + validEmail);

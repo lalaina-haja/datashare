@@ -52,7 +52,7 @@ public class JwtServiceTest {
 
   /** Tests successful JWT token generation */
   @Test
-  @DisplayName("TEST-JWT-001: Should generate token successfully")
+  @DisplayName("UNIT-JWT-001: Should generate token successfully")
   public void get_token_successful() {
 
     // GIVEN the user details successfully authenticated
@@ -78,7 +78,7 @@ public class JwtServiceTest {
 
   /** Test that an invalid user throws Exception for Encoding failed */
   @Test
-  @DisplayName("TEST-JWT-002: Should throw exception for encoding failed on invalid user")
+  @DisplayName("UNIT-JWT-002: Should throw exception for encoding failed on invalid user")
   public void get_token_invalid_user_details_throws_exception() {
 
     // GIVEN invalid user details
@@ -95,7 +95,7 @@ public class JwtServiceTest {
 
   /** Test that an expired token is invalid */
   @Test
-  @DisplayName("TEST-JWT-003: Should returns invalid for an expired token")
+  @DisplayName("UNIT-JWT-003: Should returns invalid for an expired token")
   public void expired_token_is_invalid() {
 
     // GIVEN an expired token
@@ -116,7 +116,7 @@ public class JwtServiceTest {
 
   /** Test that isValid() returns true for a valid token */
   @Test
-  @DisplayName("TEST-JWT-004: Should return valid for valid a token")
+  @DisplayName("UNIT-JWT-004: Should return valid for valid a token")
   public void valid_token_is_valid() {
 
     // GIVEN a valid token
@@ -137,7 +137,7 @@ public class JwtServiceTest {
 
   /** Test that a token with wrong user is invalid */
   @Test
-  @DisplayName("TEST-JWT-005: Should return invalid for wrong user")
+  @DisplayName("UNIT-JWT-005: Should return invalid for wrong user")
   public void token_with_wrong_user_is_invalid() {
 
     // GIVEN a token with a different subject
@@ -156,7 +156,7 @@ public class JwtServiceTest {
 
   /** Test that the email is exctracted from the token */
   @Test
-  @DisplayName("TEST-JWT-006: Should extract email from token")
+  @DisplayName("UNIT-JWT-006: Should extract email from token")
   void testExtractUsername() {
 
     // GIVEN the user details successfully authenticated

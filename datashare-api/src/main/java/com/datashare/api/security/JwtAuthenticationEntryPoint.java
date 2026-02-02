@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Handler that returns 401 Unauthorized when authentification fails */
 @Component
@@ -35,7 +35,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     body.put("message", authException.getMessage());
     body.put("path", request.getServletPath());
 
-    ObjectMapper mapper = new ObjectMapper();
+    JsonMapper mapper = new JsonMapper();
     mapper.writeValue(response.getOutputStream(), body);
   }
 }

@@ -1,7 +1,6 @@
 package com.datashare.api.configuration;
 
 import com.datashare.api.security.CsrfCookieFilter;
-import com.datashare.api.security.CustomLogoutHandler;
 import com.datashare.api.security.CustomUserDetailService;
 import com.datashare.api.security.JwtAuthenticationEntryPoint;
 import com.datashare.api.security.JwtAuthenticationFilter;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -42,8 +42,6 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 public class SecurityConfig {
 
   @Autowired private final JwtAuthenticationFilter jwtAuthFilter;
-
-  @Autowired private final CustomLogoutHandler logoutHandler;
 
   @Autowired private final CustomUserDetailService customUserDetailService;
 
@@ -113,11 +111,8 @@ public class SecurityConfig {
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(requestHandler)
                     .ignoringRequestMatchers(
-                        // ════════════════════════════════════════════════════
-                        // Public Endpoints without authentification
-                        // ════════════════════════════════════════════════════
-                        "/auth/register",
                         "/auth/login",
+                        "/auth/register",
                         "/auth/logout",
                         "/actuator/**",
                         "/files/public/**",
@@ -159,12 +154,12 @@ public class SecurityConfig {
                         "/auth/register",
                         "/auth/login",
                         "/auth/logout",
+                        "/auth/me",
                         "/actuator/**",
-                        "/files/public/**")
+                        "/files/public/**",
+                        "/error")
                     .permitAll()
                     // Other paths need authentification
-                    .requestMatchers("/auth/me")
-                    .authenticated()
                     .anyRequest()
                     .authenticated())
 
@@ -187,12 +182,30 @@ public class SecurityConfig {
             logout ->
                 logout
                     .logoutUrl("/auth/logout")
-                    .addLogoutHandler(logoutHandler)
                     .logoutSuccessHandler(
                         (request, response, authentication) -> {
+                          ResponseCookie deleteAuth =
+                              ResponseCookie.from("AUTH-TOKEN", "")
+                                  .httpOnly(true)
+                                  .secure(true)
+                                  .sameSite("Strict")
+                                  .path("/")
+                                  .maxAge(0)
+                                  .build();
+
+                          ResponseCookie deleteXsrf =
+                              ResponseCookie.from("XSRF-TOKEN", "")
+                                  .httpOnly(false) // XSRF is not HttpOnly
+                                  .secure(true)
+                                  .sameSite("Strict")
+                                  .path("/")
+                                  .maxAge(0)
+                                  .build();
+
+                          response.addHeader("Set-Cookie", deleteAuth.toString());
+                          response.addHeader("Set-Cookie", deleteXsrf.toString());
                           response.setStatus(200);
-                        })
-                    .deleteCookies("AUTH-TOKEN", "XSRF-TOKEN"))
+                        }))
 
         // ════════════════════════════════════════════════════
         // JWT FILTERS

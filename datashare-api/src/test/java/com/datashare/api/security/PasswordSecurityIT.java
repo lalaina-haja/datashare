@@ -13,17 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test Set for Password Security */
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class PasswordSecurityIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JsonMapper jsonMapper;
 
   /** Test that weak passwords are rejected */
   @ParameterizedTest
@@ -53,7 +55,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").exists());
   }
@@ -84,7 +86,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isCreated());
   }
 
@@ -101,7 +103,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("100")));
   }
@@ -119,7 +121,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("uppercase")));
   }
@@ -137,7 +139,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("lowercase")));
   }
@@ -155,7 +157,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("digit")));
   }
@@ -173,7 +175,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("special")));
   }
@@ -192,7 +194,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.password").value(containsString("100")));
   }
@@ -210,7 +212,7 @@ public class PasswordSecurityIT {
         .perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andExpect(status().isCreated());
   }
 }

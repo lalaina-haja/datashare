@@ -2,6 +2,7 @@ package com.datashare.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -11,6 +12,7 @@ import com.datashare.api.entities.User;
 import com.datashare.api.repository.UserRepository;
 import com.datashare.api.service.UserService;
 import jakarta.servlet.http.Cookie;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,18 +23,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Integration tests for the authentication controller.
- *
- * <p>This test class validates the authentication endpoints including user registration and login.
- * It uses Testcontainers with PostgreSQL to provide a real database environment for testing.
- */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc(addFilters = false)
+/** Integration tests for the authentication controller. */
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class AuthControllerIT {
 
   /** API path for user registration */
@@ -53,11 +52,11 @@ public class AuthControllerIT {
   /** UserRepository for database operations */
   @Autowired private UserRepository userRepository;
 
-  /** UserService for user management */
+  /** UserService for registration */
   @Autowired private UserService userService;
 
   /** ObjectMapper for JSON serialization/deserialization */
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JsonMapper jsonMapper;
 
   /**
    * Cleans up test data after each test. Deletes all users from the repository to ensure test
@@ -83,7 +82,7 @@ public class AuthControllerIT {
    * @throws Exception if the HTTP request fails
    */
   @Test
-  @DisplayName("Register successful saves user in repository")
+  @DisplayName("INTEG-REGISTER-001: Register successful saves user in repository")
   public void register_user_successful() throws Exception {
 
     // GIVEN the correct credentials
@@ -94,7 +93,7 @@ public class AuthControllerIT {
         .perform(
             post(PATH_REGISTER)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.message").value("User registered successfully"))
@@ -114,9 +113,10 @@ public class AuthControllerIT {
    * @param missing the name of the field that is missing in the request
    * @throws Exception if the HTTP request fails
    */
-  @ParameterizedTest(name = "register_with_missing_{0}_field_returns_bad_request")
+  @ParameterizedTest(
+      name = "INTEG-REGISTER-002: Register with missing {0} field returns bad request")
   @ValueSource(strings = {"email", "password"})
-  @DisplayName("Register with missing field returns bad request")
+  @DisplayName("AUTH-REGISTER-002: Register with missing field returns bad request")
   public void register_with_missing_field_returns_bad_request(String missing) throws Exception {
 
     // GIVEN a field is missing
@@ -129,7 +129,7 @@ public class AuthControllerIT {
         .perform(
             post(PATH_REGISTER)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(
@@ -143,7 +143,7 @@ public class AuthControllerIT {
 
   /** Test that registering with invalid email and password returns bad request */
   @Test
-  @DisplayName("Register with invalid credentials returns bad request")
+  @DisplayName("INTEG-REGISTER-003: Register with invalid credentials returns bad request")
   public void register_with_invalid_credentials_returns_bad_request() throws Exception {
 
     // GIVEN an invalid email and password
@@ -154,7 +154,7 @@ public class AuthControllerIT {
         .perform(
             post(PATH_REGISTER)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.email").value("Invalid email format"))
@@ -166,7 +166,7 @@ public class AuthControllerIT {
 
   /** Test that registering existing user returns bad request */
   @Test
-  @DisplayName("Register existing user returns bad request")
+  @DisplayName("INTEG-REGISTER-004: Register existing user returns bad request")
   public void register_existing_user_returns_bad_request() throws Exception {
 
     // GIVEN existing user
@@ -179,7 +179,7 @@ public class AuthControllerIT {
         .perform(
             post(PATH_REGISTER)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Email is already in use: " + EMAIL))
@@ -190,7 +190,7 @@ public class AuthControllerIT {
 
   /** Test that login success returns cookie with token */
   @Test
-  @DisplayName("Login successful returns cookie with token")
+  @DisplayName("INTEG-LOGIN-001: Login successful returns cookie with token")
   public void login_success_returns_token() throws Exception {
 
     // GIVEN existing user and correct credentials
@@ -203,8 +203,9 @@ public class AuthControllerIT {
         mockMvc
             .perform(
                 post(PATH_LOGIN)
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+                    .content(jsonMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
@@ -214,8 +215,9 @@ public class AuthControllerIT {
   }
 
   /** Test that Login with missing field returns bad request */
-  @ParameterizedTest(name = "login_with_missing_{0}_field_returns_bad_request")
+  @ParameterizedTest(name = "INTEG-LOGIN-002: Login with missing {0} field returns bad request")
   @ValueSource(strings = {"email", "password"})
+  @DisplayName("INTEG-LOGIN-002: Login with missing field returns bad request")
   public void login_with_missing_field_returns_bad_request(String missing) throws Exception {
 
     // GIVEN a field is missing
@@ -227,8 +229,9 @@ public class AuthControllerIT {
     mockMvc
         .perform(
             post(PATH_LOGIN)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(
@@ -242,7 +245,7 @@ public class AuthControllerIT {
 
   /** Test that login with inexisting user returns invalid credentials */
   @Test
-  @DisplayName("Login with inexisting user returns invalid credentials")
+  @DisplayName("INTEG-LOGIN-003: Login with inexisting user returns invalid credentials")
   public void login_with_inexisting_user_returns_invalid_credentials() throws Exception {
 
     // GIVEN inexisting user
@@ -252,8 +255,9 @@ public class AuthControllerIT {
     mockMvc
         .perform(
             post(PATH_LOGIN)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Invalid email"))
@@ -264,7 +268,7 @@ public class AuthControllerIT {
 
   /** Test that login with wrong password returns invalid credentials */
   @Test
-  @DisplayName("Login with wrong password returns invalid credentials")
+  @DisplayName("INTEG-LOGIN-004: Login with wrong password returns invalid credentials")
   public void login_with_wrong_password_returns_invalid_credentials() throws Exception {
 
     // GIVEN the existing user and the request with wrong password
@@ -276,13 +280,28 @@ public class AuthControllerIT {
     mockMvc
         .perform(
             post(PATH_LOGIN)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(jsonMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Invalid password"))
         .andExpect(jsonPath("$.path").value(PATH_LOGIN))
         .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
         .andExpect(jsonPath("$.timestamp").isNotEmpty());
+  }
+
+  @Test
+  @DisplayName("INTEG-LOGOUT-001: /auth/logout should delete AUTH-TOKEN and XSRF-TOKEN cookies")
+  void testLogoutDeletesCookies() throws Exception {
+
+    MvcResult result =
+        mockMvc.perform(post("/auth/logout").with(csrf())).andExpect(status().isOk()).andReturn();
+
+    List<String> cookies = result.getResponse().getHeaders("Set-Cookie");
+
+    assertThat(cookies).anyMatch(c -> c.contains("AUTH-TOKEN=;"));
+    assertThat(cookies).anyMatch(c -> c.contains("XSRF-TOKEN=;"));
+    assertThat(cookies).anyMatch(c -> c.contains("Max-Age=0"));
   }
 }

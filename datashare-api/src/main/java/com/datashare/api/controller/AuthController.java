@@ -4,6 +4,7 @@ import com.datashare.api.dto.LoginRequest;
 import com.datashare.api.dto.LoginResponse;
 import com.datashare.api.dto.RegisterRequest;
 import com.datashare.api.dto.RegisterResponse;
+import com.datashare.api.entities.User;
 import com.datashare.api.mapper.UserMapper;
 import com.datashare.api.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,7 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -88,13 +89,15 @@ public class AuthController {
    * @return
    */
   @GetMapping("/me")
-  public ResponseEntity<?> getCurrentUser(
-      @org.springframework.security.core.annotation.AuthenticationPrincipal
-          UserDetails userDetails) {
+  public ResponseEntity<?> getCurrentUser(Authentication authentication) {
 
+    if (authentication == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    User user = (User) authentication.getPrincipal();
     return ResponseEntity.ok(
         Map.of(
-            "email", userDetails.getUsername(),
-            "authorities", userDetails.getAuthorities()));
+            "email", user.getUsername(),
+            "authorities", user.getAuthorities()));
   }
 }

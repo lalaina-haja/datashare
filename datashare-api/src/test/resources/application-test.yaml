@@ -1,7 +1,29 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: never
+
+security:
+  jwt:
+    secret: unit-and-it-test-secret-key-32-bytes-min-here-it-is
+    expiration: 60
+    issuer: datashare-api
+
+logging:
+  level:
+    org:
+      hibernate:
+        type: info
+      springframework: DEBUG
+    com:
+      datashare:
+        api: DEBUG

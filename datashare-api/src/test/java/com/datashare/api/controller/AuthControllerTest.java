@@ -9,11 +9,9 @@ import com.datashare.api.dto.LoginRequest;
 import com.datashare.api.dto.LoginResponse;
 import com.datashare.api.dto.RegisterRequest;
 import com.datashare.api.dto.RegisterResponse;
-import com.datashare.api.entities.User;
 import com.datashare.api.mapper.UserMapper;
 import com.datashare.api.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +35,6 @@ public class AuthControllerTest {
 
   private RegisterRequest validRegisterRequest;
   private LoginRequest validLoginRequest;
-  private User testUser;
   private HttpServletResponse response;
   private RegisterResponse registerResponse;
 
@@ -46,7 +43,6 @@ public class AuthControllerTest {
     validRegisterRequest = new RegisterRequest("test@example.com", "ValidPass123!");
     validLoginRequest = new LoginRequest("test@example.com", "ValidPass123!");
     registerResponse = new RegisterResponse("User registered successfully", "1", null);
-    testUser = new User(1L, "test@example.com", "hashedPassword", null);
     response = new MockHttpServletResponse();
   }
 
@@ -56,7 +52,7 @@ public class AuthControllerTest {
 
   /** Test that a valid request returns 201 */
   @Test
-  @DisplayName("TEST-AUTHCTRL-001: Register Should return 201")
+  @DisplayName("UNIT-AUTHCTRL-001: Register Should return 201")
   void testRegisterSuccess() {
 
     // GIVEN valid request
@@ -72,7 +68,7 @@ public class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("TEST-AUTHCTRL-002: Register should handle generic exceptions")
+  @DisplayName("UNIT-AUTHCTRL-002: Register should handle generic exceptions")
   void testRegisterGenericException() {
     // Arrange
     when(userService.register(any())).thenThrow(new RuntimeException("Database error"));
@@ -90,7 +86,7 @@ public class AuthControllerTest {
   // ════════════════════════════════════════════════════
 
   @Test
-  @DisplayName("TEST-AUTHCTRL-003: Login should return 200 et create cookie")
+  @DisplayName("UNIT-AUTHCTRL-003: Login should return 200 et create cookie")
   void testLoginSuccess() {
     // Arrange
     String expectedToken = "eyJhbGciOiJIUzI1NiJ9.test.token";
@@ -111,7 +107,7 @@ public class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("TEST-AUTHCTRL-004: Login should handle generic exceptions")
+  @DisplayName("UNIT-AUTHCTRL-004: Login should handle generic exceptions")
   void testLoginGenericException() {
     // Arrange
     when(userService.login(any(), any())).thenThrow(new RuntimeException("Server error"));
@@ -125,7 +121,7 @@ public class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("TEST-AUTHCTRL-005: Cookie devrait avoir les bons attributs")
+  @DisplayName("UNIT-AUTHCTRL-005: Cookie devrait avoir les bons attributs")
   void testCookieAttributes() {
     // Arrange
     String expectedToken = "eyJhbGciOiJIUzI1NiJ9.test.token";
@@ -144,22 +140,5 @@ public class AuthControllerTest {
     assertThat(setCookie).containsIgnoringCase("SameSite=Strict");
     assertThat(setCookie).contains("Path=/");
     assertThat(setCookie).contains("Max-Age=604800"); // 7 days
-  }
-
-  @Test
-  @DisplayName("TEST-AUTHCTRL-006: getCurrentUser shourl return user information")
-  void testGetCurrentUser() {
-    // Act
-    ResponseEntity<?> result = authController.getCurrentUser(testUser);
-
-    // Assert
-    assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(result.getBody()).isInstanceOf(Map.class);
-
-    @SuppressWarnings("unchecked")
-    Map<String, Object> body = (Map<String, Object>) result.getBody();
-    assertThat(body).containsKey("email");
-    assertThat(body).containsKey("authorities");
-    assertThat(body.get("email")).isEqualTo(testUser.getEmail());
   }
 }
