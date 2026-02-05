@@ -2,11 +2,7 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm",
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ],
-    "analytics": false
+    "packageManager": "npm"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -24,10 +20,8 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/angular-vitest-cypress",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
-            "tsConfig": "tsconfig.app.json",
+            "tsConfig": "config/tsconfig/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
@@ -35,16 +29,14 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "config/env/environment.ts",
+                  "with": "config/env/environment.prod.ts"
                 }
               ],
               "budgets": [
@@ -67,8 +59,8 @@
               "sourceMap": true,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "replace": "config/env/environment.ts",
+                  "with": "config/env/environment.dev.ts"
                 }
               ]
             }
@@ -88,21 +80,10 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@analogjs/vitest-angular:test",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "tsconfig.spec.json",
-            "buildTarget": "::development",
-            "runner": "vitest",
-            "providersFile": "config/vitest.setup.ts"
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "tsConfig": "config/tsconfig/tsconfig.spec.json",
+            "buildTarget": "datashare-web:build:development"
           }
         }
       }

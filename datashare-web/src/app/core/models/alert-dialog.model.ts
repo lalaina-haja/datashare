@@ -9,14 +9,14 @@ export interface AlertDialogData {
   message: string;
 
   /** response status */
-  status: number | null;
+  status?: number;
 
   /** the request path causing the error */
-  path: string | null;
+  path?: string;
 
   /** the timestamp of the original request */
-  timestamp: string | null;
+  timestamp?: string;
 
-  /** list of validation errors */
-  validationErrors: Record<string, string> | null; // erreurs de validation
+  /** list of detailed errors */
+  errors?: Record<string, string>;
 }

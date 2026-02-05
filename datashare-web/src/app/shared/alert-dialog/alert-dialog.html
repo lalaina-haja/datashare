@@ -3,29 +3,25 @@
 <mat-dialog-content>
   <!-- Success or simple Error message -->
   @if (data.message) {
-    <p>{{ data.message }}</p>
+  <p>{{ data.message }}</p>
   }
 
-  <!-- Validation errors -->
-  @if (data.validationErrors) {
-    <div>Validation errors:</div>
-    <ul>
-      @for (error of validationErrorEntries(); track error.key) {
-        <li>
-          <strong>{{ error.key }}</strong> : {{ error.value }}
-        </li>
-      }
-    </ul>
+  <!-- Errors details -->
+  @if (data.errors) {
+  <div>Error details:</div>
+  <ul>
+    @for (error of errorsEntries(); track error.key) {
+    <li><strong>{{ error.key }}</strong> : {{ error.value }}</li>
+    }
+  </ul>
   }
   <!-- Extra error informations -->
   @if (data.status) {
-    <div>status: {{ data.status }}</div>
-  }
-  @if (data.path) {
-    <div>path: {{ data.path }}</div>
-  }
-  @if (data.timestamp) {
-    <div>timestamp: {{ data.timestamp }}</div>
+  <div>status: {{ data.status }}</div>
+  } @if (data.path) {
+  <div>path: {{ data.path }}</div>
+  } @if (data.timestamp) {
+  <div>timestamp: {{ data.timestamp }}</div>
   }
 </mat-dialog-content>
 

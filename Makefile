@@ -56,19 +56,20 @@ help:
 	@echo ""
 	@echo -e "$(F_TITLE)API Tests (Maven Surefire / Failsafe):"
 	@echo -e "$(F_KEYWORD)   make test-api-unit        $(F_REGULAR)Run API unit tests"
-	@echo -e "$(F_KEYWORD)   make test-api-it          $(F_REGULAR)Run API integration tests "
+	@echo -e "$(F_KEYWORD)   make test-api-integ       $(F_REGULAR)Run API integration tests "
 	@echo ""
 	@echo -e "$(F_TITLE)Web Tests (Vitest):"
 	@echo -e "$(F_KEYWORD)   make test-web-unit        $(F_REGULAR)Run Web unit tests"
-	@echo -e "$(F_KEYWORD)   make test-web-it          $(F_REGULAR)Run Web integration tests"
+	@echo -e "$(F_KEYWORD)   make test-web-integ       $(F_REGULAR)Run Web integration tests"
 	@echo ""
 	@echo -e "$(F_TITLE)End to end Tests (Cypress):"
-	@echo -e "$(F_KEYWORD)   make test-e2e             $(F_REGULAR)Run end-to-end tests"
+	@echo -e "$(F_KEYWORD)   make test-e2e-open        $(F_REGULAR)Run end-to-end tests in GUI mode (Cypress open)"
+	@echo -e "$(F_KEYWORD)   make test-e2e-ci          $(F_REGULAR)Run end-to-end tests in headless mode (Cypress run)"
 	@echo ""
 	@echo -e "$(F_TITLE)Combined Test Targets:"
-	@echo -e "$(F_KEYWORD)   make test-unit            $(F_REGULAR)Run all unit tests (API + Web)"
-	@echo -e "$(F_KEYWORD)   make test-it              $(F_REGULAR)Run all integration tests (API + Web)"
-	@echo -e "$(F_KEYWORD)   make test-all             $(F_REGULAR)Run all tests sequentially (test-unit, test-it, test-e2e)"
+	@echo -e "$(F_KEYWORD)   make test-unit            $(F_REGULAR)Run all unit tests in ci mode (API + Web)"
+	@echo -e "$(F_KEYWORD)   make test-integ           $(F_REGULAR)Run all integration tests in ci mode (API + Web)"
+	@echo -e "$(F_KEYWORD)   make test-all             $(F_REGULAR)Run all tests sequentially in ci mode (test-unit, test-integ, test-e2e)"
 	@echo ""
 	@echo -e "$(F_TITLE)Versioning:"
 	@echo -e "$(F_KEYWORD)   make version              $(F_REGULAR)Show current version (VERSION file)"
@@ -114,7 +115,7 @@ endif
 .PHONY: install-web
 install-web:
 	@echo -e "$(F_MESSAGE)Installing datashare-web dependencies...$(F_REGULAR)"
-	@cd datashare-web && npm install
+	@cd ${WEB_DIR} && npm install
 
 # ============================
 # Start backend / frontend
@@ -171,49 +172,61 @@ build-all: build-api build-web
 # ============================
 # Backend tests (Maven Surefire / Failsafe)
 # ============================
-.PHONY: test-api-unit test-api-it test-api-e2e
+.PHONY: test-api-unit 
 test-api-unit:
 	@echo -e "$(F_MESSAGE)Running backend unit tests...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw test -Punit
 
-test-api-it:
+.PHONY: test-api-integ
+test-api-integ:
 	@echo -e "$(F_MESSAGE)Running backend integration tests...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw verify -Pit -Dspring.profiles.active=test
 
 # ============================
 # Frontend tests (Vitest)
 # ============================
-.PHONY: test-web-unit test-web-it
+.PHONY: test-web-unit 
 test-web-unit: install-web
 	@echo -e "$(F_MESSAGE)Running frontend unit tests...$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm run test:unit 
 
-test-web-it: install-web
+.PHONY: test-web-integ
+test-web-integ: install-web
 	@echo -e "$(F_MESSAGE)Running frontend integration tests...$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm run test:integration
+	@cd $(WEB_DIR) && npm run test:integ
 
 # ============================
 # End to End tests (Cypress)
 # ============================
-.PHONY: test-e2e
-test-e2e: 
+.PHONY: test-e2e-open 
+test-e2e-open: install-web
 	$(MAKE) start-api &
-	@echo -e "$(F_MESSAGE)Running end-to-end tests...$(F_REGULAR)"
-	@cd $(WEB_DIR) && npm run test:e2e:headless  
+	@echo -e "$(F_MESSAGE)Running end-to-end tests in GUI mode...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:e2e:open
+
+.PHONY: test-e2e-ci
+test-e2e-ci: install-web
+	$(MAKE) start-api &
+	@echo -e "$(F_MESSAGE)Running end-to-end tests in headless mode...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:e2e:ci
 
 # ============================
 # Combined targets
 # ============================
 .PHONY: test-unit
-test-unit: test-api-unit test-web-unit
+test-unit: test-api-unit 
+	@echo -e "$(F_MESSAGE)Running frontend unit tests...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:unit:ci
 	@echo -e "$(F_MESSAGE) ✔ All unit tests finished.$(F_REGULAR)"
 
-.PHONY: test-it
-test-it: test-api-it test-web-it
+.PHONY: test-integ
+test-integ: test-api-integ 
+	@echo -e "$(F_MESSAGE)Running frontend integration tests...$(F_REGULAR)"
+	@cd $(WEB_DIR) && npm run test:integ:ci
 	@echo -e "$(F_MESSAGE) ✔ All integration tests finished.$(F_REGULAR)"
 
 .PHONY: test-all
-test-all: test-unit test-it test-e2e
+test-all: test-unit test-integ test-e2e-ci
 	@echo -e "$(F_MESSAGE) ✔ All tests finished.$(F_REGULAR)"
 
 # ============================
@@ -250,15 +263,15 @@ run-web:
 .PHONY: doc-api doc-web doc publish-doc
 doc-api:
 	@mkdir -p docs/javadoc
-	@cd datashare-api && ./mvnw javadoc:javadoc
+	@cd $(API_DIR) && ./mvnw javadoc:javadoc
 	@echo -e "$(F_MESSAGE)📚 Javadoc: docs/javadoc/index.html$(F_REGULAR)"
 doc-web:
 	@mkdir -p docs/typedoc
-	@cd datashare-web && npm run typedoc -- --out ../../docs/typedoc
+	@cd $(WEB_DIR) && npm run typedoc
 	@echo -e "$(F_MESSAGE)📚 TypeDoc: docs/typedoc/index.html$(F_REGULAR)"
 doc: doc-api doc-web
-	@echo -e "$(F_MESSAGE)✅ Documentation complète: docs/$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE)✔ Documentation complète: docs/$(F_REGULAR)"
 publish-doc: doc
 	@git add docs/
 	@git commit -m "docs: update javadoc + typedoc" || echo "Rien à commiter$(F_REGULAR)"
-	@echo -e "$(F_MESSAGE)✅ Docs versionnés Git !$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE)✔ Docs versionnés Git !$(F_REGULAR)"

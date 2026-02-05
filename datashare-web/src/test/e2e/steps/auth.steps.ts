@@ -1,49 +1,86 @@
-import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
+import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-const API_URL = Cypress.env('API_URL');
-
-Given('I open the register page', () => {
-  cy.visit('/register');
+/** Open a page */
+Given("I open the {word} page", (pageName) => {
+  cy.visit(`/${pageName}`);
 });
 
-When('I submit valid register data', () => {
-  cy.intercept('POST', `${API_URL}/register`).as('register');
+/** Login the test user */
+Given("I am logged in", () => {
+  cy.visit(`/login`);
+  cy.getAppConfig().then((env) => {
+    cy.intercept("POST", `${env.apiUrl}/auth/login`).as("login");
 
-  cy.get('input[name=email]').type('e2e@test.com');
-  cy.get('input[name=password]').type('password');
-  cy.get('button[type=submit]').click();
+    cy.get("input[formControlName=email]").type(env.testEmail);
+    cy.get("input[formControlName=password]").type(env.testPass);
+    cy.get("button[type=submit]").click();
 
-  cy.wait('@register');
+    cy.wait("@login");
+  });
+  cy.contains("button", "Se deconnecter").should("exist").and("be.visible");
 });
 
-Then('I should see a success message', () => {
-  cy.contains('Registration successful');
+/** Submit registration with email and password */
+When(
+  "I register {string} with password {string}",
+  (email: string, password: string) => {
+    cy.getAppConfig().then((env) => {
+      cy.intercept("POST", `${env.apiUrl}/auth/register`).as("register");
+
+      cy.get("input[formControlName=email]").type(email);
+      cy.get("input[formControlName=password]").type(password);
+      cy.get("input[formControlName=confirmPassword]").type(password);
+      cy.get("button[type=submit]").click();
+
+      cy.wait("@register");
+    });
+  },
+);
+
+/** Submit login with email and password */
+When(
+  "I login {string} with password {string}",
+  (email: string, password: string) => {
+    cy.getAppConfig().then((env) => {
+      cy.intercept("POST", `${env.apiUrl}/auth/login`).as("login");
+
+      cy.get("input[formControlName=email]").type(email);
+      cy.get("input[formControlName=password]").type(password);
+      cy.get("button[type=submit]").click();
+
+      cy.wait("@login");
+    });
+  },
+);
+
+/** Logout */
+When("I logout", () => {
+  cy.getAppConfig().then((env) => {
+    cy.get("[data-testid=connection-button]").click();
+  });
 });
 
-Given('I open the login page', () => {
-  cy.visit('/login');
+/** Logged in = Connexion button shows "Se deconnecter" */
+Then("I should be logged in", () => {
+  cy.contains("button", "Se deconnecter").should("exist").and("be.visible");
 });
 
-When('I submit valid credentials', () => {
-  cy.intercept('POST', `${API_URL}/login`).as('login');
-
-  cy.get('input[name=email]').type('e2e@test.com');
-  cy.get('input[name=password]').type('password');
-  cy.get('button[type=submit]').click();
-
-  cy.wait('@login');
+/** Logged out = Connexion button shows "Se connecter" */
+Then("I should be logged out", () => {
+  cy.contains("button", "Se connecter").should("exist").and("be.visible");
 });
 
-Then('I should be logged in', () => {
-  cy.url().should('include', '/dashboard');
+/** Check if user is redirected to login page */
+Then("I should be redirected to login", () => {
+  cy.url().should("include", "/login");
 });
 
-When('I logout', () => {
-  cy.intercept('POST', `${API_URL}/logout`).as('logout');
-  cy.get('[data-testid=logout]').click();
-  cy.wait('@logout');
+/** Check error message */
+Then("I should see the error message {string}", (message: string) => {
+  cy.get(".error-message").should("contain", message);
 });
 
-Then('I should be redirected to login', () => {
-  cy.url().should('include', '/login');
+/** Check if user is on the expected page */
+Then("I should stay at {word} page", (pageName: string) => {
+  cy.url().should("include", `/${pageName}`);
 });

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/main.ts", "src/app"],
+  "out": "docs",
+  "readme": "none",
+  "name": "Datashare Web",
+  "entryPointStrategy": "expand",
+  "categorizeByGroup": true,
+  "groupOrder": [
+    "Classes",
+    "Interfaces",
+    "Type aliases",
+    "Functions",
+    "Variables"
+  ],
+  "categoryOrder": ["Public API", "Internal", "Utilities"],
+  "visibilityFilters": {
+    "protected": true,
+    "private": false,
+    "inherited": true
+  },
+  "tsconfig": "./tsconfig.json",
+  "cleanOutputDir": true,
+  "gitRevision": "main",
+  "gitRemote": "origin",
+
+  // Compiler options spécifiques
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "declaration": true
+  },
+
+  // Exclusion
+  "exclude": ["**/src/test/**"]
+}

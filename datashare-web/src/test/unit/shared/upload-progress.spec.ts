@@ -1,9 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+// src/test/unit/shared/upload-progress.spec.ts
 
-import { UploadProgress } from '../../../app/shared/upload-progress/upload-progress';
+// Angular Testing
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { describe, it, expect, beforeEach } from "vitest";
+// SUT (System Under Test)
+import { UploadProgress } from "../../../app/shared/upload-progress/upload-progress";
 
-describe('UploadProgress', () => {
+/** UploadProgress unit tests */
+describe("UploadProgress (unit)", () => {
   let component: UploadProgress;
   let fixture: ComponentFixture<UploadProgress>;
 
@@ -17,7 +21,7 @@ describe('UploadProgress', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

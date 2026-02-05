@@ -62,7 +62,7 @@ if [ $? -eq 0 ]; then
     echo -e "${TAG} ✔ Database reset successful"
     echo ""
 else
-    echo -e "${TAG} x Database reset failed"
+    echo -e "${TAG} ✘ Database reset failed"
     echo ""
     exit 1
 fi

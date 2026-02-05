@@ -347,17 +347,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<failOnError>false</failOnError>
+					<failOnWarnings>false</failOnWarnings>
+					<sourcepath>src/main/java</sourcepath>
+				</configuration>
 				<executions>
 					<execution>
 						<id>default</id>
 						<phase>none</phase>
+						<configuration>
+							<outputDirectory>../docs/javadoc</outputDirectory>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<sourcepath>src/main/java</sourcepath>
-					<destDir>../docs/javadoc</destDir>
-					<doclint>none</doclint>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

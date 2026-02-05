@@ -1,9 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+// src/test/unit/shared/file-card.spec.ts
 
-import { FileCard } from '../../../app/shared/file-card/file-card';
+// Angular Testing
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { describe, it, expect, beforeEach } from "vitest";
+// SUT (System Under Test)
+import { FileCard } from "../../../app/shared/file-card/file-card";
 
-describe('FileCard', () => {
+/** FileCard unit tests */
+describe("FileCard (unit)", () => {
   let component: FileCard;
   let fixture: ComponentFixture<FileCard>;
 
@@ -17,7 +21,7 @@ describe('FileCard', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

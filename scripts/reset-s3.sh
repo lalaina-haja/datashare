@@ -44,7 +44,7 @@ if [ $? -eq 0 ]; then
     echo -e "${TAG} ✔ S3 reset successful"
     echo ""
 else
-    echo -e "${TAG} x S3 reset failed"
+    echo -e "${TAG} ✘ S3 reset failed"
     echo ""
     exit 1
 fi

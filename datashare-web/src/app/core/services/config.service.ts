@@ -1,14 +1,16 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { Injectable } from "@angular/core";
+import { environment } from "../../../../config/env/environment";
 
 export interface ApiEndpoints {
-  auth: string;
+  register: string;
+  login: string;
+  logout: string;
+  me: string;
   files: string;
-  users: string;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ConfigService {
   private readonly config = {
@@ -16,9 +18,11 @@ export class ConfigService {
       baseUrl: environment.apiUrl,
       timeout: environment.timeout,
       endpoints: {
-        auth: '/auth',
-        files: '/files',
-        users: '/users',
+        register: "/auth/register",
+        login: "/auth/login",
+        logout: "/auth/logout",
+        me: "/auth/me",
+        files: "/files",
       } as const,
     },
     app: {

@@ -1,0 +1,25 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": false,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["cypress", "node"],
+    "paths": {
+      "@config/*": ["../config/*"],
+      "@toolings/*": ["../config/toolings/*"],
+      "@env/*": ["../config/env/*"],
+      "@core/*": ["../src/app/core/*"],
+      "@features/*": ["../src/app/features/*"],
+      "@shared/*": ["../src/app/shared/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

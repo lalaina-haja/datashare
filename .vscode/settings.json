@@ -7,7 +7,6 @@
         "**/dist/**",
         "**/coverage/**"
     ],
-
     // ESLint sur datashare-web
     "eslint.workingDirectories": [
         {
@@ -18,7 +17,6 @@
     "typescript.tsdk": "datashare-web/node_modules/typescript/lib",
     "typescript.tsserver.maxTsServerMemory": 4096,
     "typescript.disableAutomaticTypeAcquisition": true,
-
     // Informations communes
     "files.exclude": {
         "**/node_modules": true,
