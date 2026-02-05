@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# echo message formatting
+source "$(dirname "$0")/message-format.sh"
+TAG="${NC}[ ${TITLE}bump-version ${NC}]" # [bump-version]
+
+# VERSION file & package.json
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION_FILE="$ROOT_DIR/VERSION"
 PKG_JSON="$ROOT_DIR/datashare-web/package.json"
@@ -19,4 +24,4 @@ fs.writeFileSync(
 );
 EOF
 
-echo "✔ datashare-web version set to $VERSION"
+echo -e "${TAG} ✔ datashare-web version set to ${KEYWORD}$VERSION${NC}"

@@ -1,54 +1,84 @@
 {
   "name": "datashare-web",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "lint": "ng lint",
+    "preinstall": "../scripts/update-web-env.sh",
+    "export-env": "../scripts/export-env.sh",
+    "start": "npm run export-env && ng serve --port $WEB_PORT",
+    "build": "ng build ",
     "watch": "ng build --watch --configuration development",
-    "test-unit": "jest --config tests/config/jest.config.ts --coverage --passWithNoTests",
-    "test-it": "jest --config tests/config/jest.integration.config.ts --runInBand --passWithNoTests",
-    "test-e2e": "cypress run --config-file tests/config/cypress.config.ts || npx playwright test"
+    "test:unit": "vitest --config=config/tooling/vitest.config.unit.ts",
+    "test:unit:ci": "vitest run --config=config/tooling/vitest.config.unit.ts --coverage",
+    "test:integ": "vitest --config=config/tooling/vitest.config.integ.ts",
+    "test:integ:ci": "vitest run --config=config/tooling/vitest.config.integ.ts --coverage",
+    "test:e2e:ci": "cypress run --config-file config/tooling/cypress.config.ts",
+    "test:e2e:open": "npm run export-env && cypress open --config-file config/tooling/cypress.config.ts",
+    "test:all": "npm run test:unit:ci && npm run test:integ:ci && npm run test:e2e:ci",
+    "lint": "eslint . --config config/tooling/eslint.config.js",
+    "format": "prettier --config config/tooling/prettier.config.js --write .",
+    "format:check": "prettier --check . --config config/tooling/prettier.config.js --write .",
+    "typedoc": "typedoc --out ../../docs/typedoc",
+    "docs": "npm run typedoc"
   },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
+  "cypress-cucumber-preprocessor": {
+    "stepDefinitions": [
+      "src/test/e2e/steps/**/*.{js,ts}"
     ]
   },
   "private": true,
   "packageManager": "npm@11.7.0",
   "dependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/compiler": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
-    "@angular/router": "^21.0.0",
+    "@angular/animations": "^21.1.2",
+    "@angular/aria": "^21.1.2",
+    "@angular/cdk": "^21.1.2",
+    "@angular/common": "^21.1.2",
+    "@angular/compiler": "^21.1.2",
+    "@angular/core": "^21.1.2",
+    "@angular/forms": "^21.1.2",
+    "@angular/material": "^21.1.2",
+    "@angular/platform-browser": "^21.1.2",
+    "@angular/platform-browser-dynamic": "^21.1.2",
+    "@angular/router": "^21.1.2",
     "dotenv": "^17.2.3",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "rxjs": "^7.8.2",
+    "tslib": "^2.3.0",
+    "zone.js": "^0.16.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.0.5",
-    "@angular/cli": "^21.0.5",
-    "@angular/compiler-cli": "^21.0.0",
-    "@playwright/test": "^1.57.0",
-    "@types/dotenv": "^6.1.1",
-    "@types/node": "^25.0.7",
-    "cypress": "^15.8.2",
-    "jest": "^30.2.0",
-    "jsdom": "^27.1.0",
-    "playwright": "^1.57.0",
-    "ts-jest": "^29.4.6",
+    "@analogjs/vite-plugin-angular": "^2.2.3",
+    "@angular-eslint/eslint-plugin": "^21.2.0",
+    "@angular-eslint/eslint-plugin-template": "^21.2.0",
+    "@angular-eslint/template-parser": "^21.2.0",
+    "@angular/build": "^21.1.0",
+    "@angular/cli": "^20.0.6",
+    "@angular/compiler-cli": "^21.1.0",
+    "@angular/material": "^21.1.2",
+    "@badeball/cypress-cucumber-preprocessor": "^24.0.0",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
+    "@testing-library/angular": "^19.0.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^25.1.0",
+    "@types/pg": "^8.16.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "angular-eslint": "^21.0.1",
+    "bcryptjs": "^3.0.3",
+    "cypress": "^15.9.0",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "eslint-plugin-vitest": "^0.0.1",
+    "jsdom": "^27.4.0",
+    "pg": "^8.18.0",
+    "prettier": "^3.8.1",
+    "typedoc": "^0.28.16",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.18"
   }
 }

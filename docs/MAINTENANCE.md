@@ -1,58 +1,70 @@
-# Maintenance
+# MAINTENANCE
 
-## Version Management
+## Purpose
 
-Current version stored in `VERSION` file.
-
-Show version:
-```bash
-make version
-```
-
-Bump version (uses `scripts/bump-version.sh`):
-```bash
-make bump-version TYPE=patch
-make bump-version TYPE=minor
-make bump-version TYPE=major
-```
-
-Sync VERSION -> datashare-web/package.json
-```bash
-make sync-version
-```
-
-## Building
-
-| Target           | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| `make build-api` | Build the API (`datashare-api`)                  |
-| `make build-web` | Build the Web (`datashare-web`) production build |
-| `make build-all` | Build both API and Web                           |
-
-## Linting
-| Target          | Description                            |
-| --------------- | -------------------------------------- |
-| `make lint-api` | API lint (Checkstyle / SpotBugs / PMD) |
-| `make lint-web` | Web lint (ESLint / Angular)            |
-| `make lint`     | Run all lint checks (API + Web)        |
-
-## Pre-commit hooks
-A pre-commit hook is provided:
-```bash
-scripts/git-hooks/pre-commit
-```
-It runs: 
-- `make test-all`
-
-Install it:
-```bash
-ln -s ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit
-
-or
-
-git config core.hooksPath scripts/git-hooks
-```
-⚠️ **TODO:** This page is under construction
+This document describes maintenance practices for datashare application.
 
 ---
-### | [⬅ Back to DataShare README](../README.md) |
+
+## Architecture Overview
+
+### REST API Architecture
+
+- Stateless REST API
+- Layered architecture:
+
+  - Controller (HTTP)
+  - Service (business logic)
+  - Repository (persistence)
+
+- JWT-based authentication
+
+---
+
+## Backend Maintenance (Spring Boot)
+
+- Modular domain-based packages
+- Centralized exception handling
+- Structured logging (SLF4J)
+- Health checks via Spring Boot Actuator
+
+---
+
+## Frontend Maintenance (Angular)
+
+- Feature-based modular architecture
+- Shared UI components and services
+- Centralized HTTP interceptors (auth, errors)
+
+---
+
+## Data Maintenance
+
+### PostgreSQL
+- Schema versioning with Flyway ?
+- Automated migrations on startup ?
+- Regular backups using pg_dump ?
+- Controlled version upgrades ?
+
+### S3 Storage
+- Private buckets
+- Lifecycle policies for expired files
+- Cleanup of orphaned files
+
+---
+
+## Deployment & Maintenance Scripts
+
+- Docker Compose for local development
+- Environment configuration via `.env`
+- Makefile for common tasks (build, format, quality)
+
+---
+
+## Accessibility (PSH)
+
+- WCAG 2.1 AA compliance
+- Semantic HTML
+- ARIA attributes
+- Keyboard navigation support
+- Screen reader compatibility

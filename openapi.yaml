@@ -55,14 +55,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
-        '401':
+        '400':
           description: Invalid credentials
 
   /files:
     post:
       summary: Upload a private file (requires authentication)
       security:
-        - BearerAuth: []
+        - httponlyBearerAuth: []
       requestBody:
         required: true
         content:
@@ -79,12 +79,12 @@ paths:
         '400':
           description: File too large (max 1 GB) or invalid expiration date
         '401':
-          description: Invalid or missing JWT
+          description: unauthenticated (invalid or missing JWT)
 
     get:
       summary: Get user upload history
       security:
-        - BearerAuth: []
+        - httponlyBearerAuth: []
       responses:
         '200':
           description: List of uploaded files
@@ -120,7 +120,7 @@ paths:
     delete:
       summary: Delete a file (owner only)
       security:
-        - BearerAuth: []
+        - httponlyBearerAuth: []
       parameters:
         - name: fileId
           in: path
@@ -141,7 +141,7 @@ paths:
     get:
       summary: Download a file (owner only)
       security:
-        - BearerAuth: []
+        - httponlyBearerAuth: []
       parameters:
         - name: fileId
           in: path
@@ -217,7 +217,7 @@ paths:
 
 components:
   securitySchemes:
-    BearerAuth:
+    httponlyBearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
@@ -228,12 +228,20 @@ components:
     Error:
       type: object
       properties:
-        code:
-          type: integer
-          description: HTTP status or internal error code
         message:
           type: string
           description: Human readable error description
+        status:
+          type: integer
+          description: HTTP status or internal error code
+        errors:
+          type: array
+          items:
+            type: string
+          description: List of specific error details
+        path:
+          type: string
+          description: Request path that generated the error
         timestamp:
           type: string
           format: date-time
@@ -253,15 +261,19 @@ components:
           format: email
         password:
           type: string
-          minLength: 6
+          minLength: 8
     RegisterResponse:
       type: object
       properties:
         message:
           type: string
-        userId:
+        email:
           type: string
-          format: uuid
+          format: email
+        authorities:
+          type: array
+          items:
+            type: string
 
     LoginRequest:
       type: object
@@ -277,11 +289,15 @@ components:
     LoginResponse:
       type: object
       properties:
-        token:
+        message:
           type: string
-        expiresIn:
+        email:
           type: string
-          description: Duration before token expires (e.g. "3600s")
+          format: email
+        authorities:
+          type: array
+          items:
+            type: string
 
     # -----------------------------------------------------------------
     #  Upload file DTO – used for both private and public uploads
@@ -417,5 +433,11 @@ components:
       properties:
         token:
           type: string
-        expiresIn:
+          description: JWT token string.
+        expiresAt:
           type: string
+          format: date-time
+          description: Expiration timestamp of the token.
+        expiresIn:
+          type: number
+          description: Duration in seconds before token expires (e.g. 3600)

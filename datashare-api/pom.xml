@@ -7,10 +7,30 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.1</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<version>4.0.2</version>
+		<relativePath />
+		<!-- lookup parent from repository -->
 	</parent>
 
+	<!-- ========================= -->
+	<!-- Properties -->
+	<!-- ========================= -->
+	<properties>
+		<revision>0.1.0</revision>
+		<java.version>21</java.version>
+		<lombok.version>1.18.42</lombok.version>
+		<s3.version>2.41.5</s3.version>
+		<mockito.version>5.11.0</mockito.version>
+		<mapstruct.version>1.6.3</mapstruct.version>
+		<jacoco.version>0.8.14</jacoco.version>
+		<spotless.version>3.1.0</spotless.version>
+		<google-java-format.version>1.19.2</google-java-format.version>
+		<maven.javadoc.version>3.8.0</maven.javadoc.version>
+	</properties>
+
+	<!-- ========================= -->
+	<!-- Project Coordinates -->
+	<!-- ========================= -->
 	<groupId>com.datashare</groupId>
 	<artifactId>datashare-api</artifactId>
 	<version>${revision}</version>
@@ -19,44 +39,25 @@
 	<description>DataShare API</description>
 
 	<!-- ========================= -->
-	<!-- Properties -->
-	<!-- ========================= -->
-	<properties>
-		<!-- fallback si VERSION absent -->
-		<revision>0.0.0-DEV</revision>
-		<java.version>21</java.version>
-		<lombok.version>1.18.42</lombok.version>
-		<testcontainers.version>1.19.8</testcontainers.version>
-		<s3.version>2.41.5</s3.version>
-	</properties>
-
-	<!-- ========================= -->
 	<!-- Dependency Management -->
 	<!-- ========================= -->
 	<dependencyManagement>
 		<dependencies>
-			<!-- Lombok centralisé -->
-			<dependency>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok</artifactId>
-				<version>${lombok.version}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<!-- TestContainers BOM -->
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 
 			<!-- AWS SDK BOM -->
 			<dependency>
 				<groupId>software.amazon.awssdk</groupId>
 				<artifactId>bom</artifactId>
 				<version>${s3.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Mockito BOM -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-bom</artifactId>
+				<version>${mockito.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -77,7 +78,7 @@
 		<!-- Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
 		<!-- Validation -->
@@ -86,7 +87,7 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- JPA | PostgreSQL -->
+		<!-- JPA + PostgreSQL -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -94,21 +95,32 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Spring Security | OAuth2 Resource Server | Oauth2 Jose -->
+		<!-- Spring Security | OAuth2 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-resource-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+
+		<!-- Docker Compose Support -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-docker-compose</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- AWS S3 -->
@@ -124,28 +136,51 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- MapStruct -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
+
 		<!-- ========================= -->
 		<!-- Tests -->
 		<!-- ========================= -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java-api</artifactId>
+			<version>3.6.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java-transport-httpclient5</artifactId>
+			<version>3.6.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -155,41 +190,177 @@
 	<!-- ========================= -->
 	<build>
 		<plugins>
-			<!-- Load VERSION -->
+
+			<!-- Spotless -->
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<id>load-version</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${project.basedir}/../VERSION</file>
-							</files>
-							<failOnMissingFile>true</failOnMissingFile>
-						</configuration>
-					</execution>
-				</executions>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>${spotless.version}</version>
+				<configuration>
+					<java>
+						<googleJavaFormat>
+							<version>${google-java-format.version}</version>
+						</googleJavaFormat>
+						<removeUnusedImports />
+						<trimTrailingWhitespace />
+						<endWithNewline />
+					</java>
+				</configuration>
 			</plugin>
+
+			<!-- Maven Compiler -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
 			<!-- Spring Boot Maven Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 
+			<!-- Unit Test: Surefire plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useModulePath>false</useModulePath>
+					<argLine>-XX:+EnableDynamicAgentLoading</argLine>
+					<systemPropertyVariables>
+						<spring.profiles.active>test</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 
+			<!-- Integration Test: Failsafe plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<spring.profiles.active>test</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- JaCoCo Maven Plugin -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<!-- For unit tests -->
+					<execution>
+						<id>pre-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<!-- For integration tests -->
+					<execution>
+						<id>pre-integration-tests</id>
+						<goals>
+							<goal>prepare-agent-integration</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-integration-tests</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>report-integration</goal>
+						</goals>
+					</execution>
+					<!-- Merging reports -->
+					<execution>
+						<id>merge</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>merge</goal>
+						</goals>
+						<configuration>
+							<fileSets>
+								<fileSet
+									implementation="org.apache.maven.shared.model.fileset.FileSet">
+									<directory>${project.basedir}</directory>
+									<includes>
+										<include>**/*.exec</include>
+									</includes>
+								</fileSet>
+							</fileSets>
+							<destFile>target/jacoco/allTest.exec</destFile>
+						</configuration>
+					</execution>
+					<!-- Generate final report -->
+					<execution>
+						<id>post-merge-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>target/jacoco/allTest.exec</dataFile>
+							<outputDirectory>target/jacoco/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<failOnError>false</failOnError>
+					<failOnWarnings>false</failOnWarnings>
+					<sourcepath>src/main/java</sourcepath>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>none</phase>
+						<configuration>
+							<outputDirectory>../docs/javadoc</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -202,9 +373,6 @@
 		<!-- unit -->
 		<profile>
 			<id>unit</id>
-			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
-			</properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -222,58 +390,29 @@
 		<!-- it -->
 		<profile>
 			<id>it</id>
-			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
-			</properties>
 			<build>
 				<plugins>
 					<plugin>
 						<artifactId>maven-failsafe-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+							<properties>
+								<spring.profiles.active>test</spring.profiles.active>
+							</properties>
+						</configuration>
 						<executions>
 							<execution>
 								<goals>
 									<goal>integration-test</goal>
 									<goal>verify</goal>
 								</goals>
-								<configuration>
-									<includes>
-										<include>**/*IT.java</include>
-									</includes>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
-
-		<!-- e2e -->
-		<profile>
-			<id>e2e</id>
-			<properties>
-				<spring.profiles.active>default</spring.profiles.active>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-failsafe-plugin</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>integration-test</goal>
-									<goal>verify</goal>
-								</goals>
-								<configuration>
-									<includes>
-										<include>**/*E2E.java</include>
-									</includes>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
 	</profiles>
 </project>

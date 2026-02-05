@@ -1,0 +1,47 @@
+{"properties": [
+  {
+    "name": "security.jwt.secret",
+    "type": "java.lang.String",
+    "description": "JWT Secret Key"
+  },
+  {
+    "name": "security.jwt.expiration",
+    "type": "java.lang.String",
+    "description": "JWT Expiration in seconds"
+  },
+  {
+    "name": "security.jwt.issuer",
+    "type": "java.lang.String",
+    "description": "JWT Issuer"
+  },
+  {
+    "name": "aws.s3.endpoint",
+    "type": "java.lang.String",
+    "description": "AWS S3 endpoint"
+  },
+  {
+    "name": "aws.s3.region",
+    "type": "java.lang.String",
+    "description": "AWS S3 Region"
+  },
+  {
+    "name": "aws.s3.bucket",
+    "type": "java.lang.String",
+    "description": "AWS S3 Bucket name"
+  },
+  {
+    "name": "aws.cors.allowed-origins",
+    "type": "java.lang.String",
+    "description": "Frontend origins allowed to make CORS requests"
+  },
+  {
+    "name": "cors-allow-origins",
+    "type": "java.lang.String",
+    "description": "A description for 'cors-allow-origins'"
+  },
+  {
+    "name": "web-url",
+    "type": "java.lang.String",
+    "description": "Frontend URL"
+  }
+]}

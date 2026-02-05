@@ -1,0 +1,15 @@
+# Angular
+.angular/
+*.tsbuildinfo
+out-tsc/
+styles.scss
+
+# Build
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Tests
+src/test/e2e/features/

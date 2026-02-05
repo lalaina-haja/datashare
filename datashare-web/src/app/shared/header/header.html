@@ -1,0 +1,30 @@
+<mat-toolbar color="primary" class="header">
+  <div class="logo">
+    <span>DataShare</span>
+  </div>
+  <span class="spacer"></span>
+
+  @if (isAuthenticated()) {
+  <mat-icon>account_circle</mat-icon>
+  <span class="user">{{ currentUser()?.email }}</span>
+  <button
+    data-testid="connection-button"
+    mat-raised-button
+    color="accent"
+    class="btn-connecter"
+    (click)="logout()"
+  >
+    Se deconnecter
+  </button>
+  } @else {
+  <button
+    data-testid="connection-button"
+    mat-raised-button
+    color="accent"
+    class="btn-connecter"
+    (click)="login()"
+  >
+    Se connecter
+  </button>
+  }
+</mat-toolbar>

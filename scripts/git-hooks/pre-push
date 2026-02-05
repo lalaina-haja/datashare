@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Running unit tests (pre-push)..."
+make test-unit
+
+echo "Pre-push unit tests passed"

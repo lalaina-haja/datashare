@@ -1,0 +1,33 @@
+.header {
+  flex-direction: row;
+}
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: 0;
+  gap: 2rem;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  :host {
+    margin: 0;
+    box-shadow: none;
+  }
+  .main {
+    padding: 1rem;
+  }
+}
