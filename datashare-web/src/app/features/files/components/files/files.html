@@ -1,1 +1,89 @@
-<p>files works!</p>
+<!-- files.html -->
+<mat-card class="files-card">
+  <mat-card-header class="title-section">
+    <mat-card-title> Mes fichiers </mat-card-title>
+  </mat-card-header>
+
+  <!-- Message -->
+  @if ( message() && error() ) {
+  <mat-label class="error-message" aria-live="assertive"
+    >{{ message() }}</mat-label
+  >
+  }
+
+  <!-- filtre -->
+  <mat-card-content class="filter-section">
+    <mat-button-toggle-group
+      #filterGroup
+      [(value)]="filter"
+      (valueChange)="setFilter($event)"
+      appearance="outline"
+    >
+      <mat-button-toggle value="all"> Tous </mat-button-toggle>
+      <mat-button-toggle value="active"> Actifs </mat-button-toggle>
+      <mat-button-toggle value="expired"> Expirés </mat-button-toggle>
+    </mat-button-toggle-group>
+  </mat-card-content>
+
+  <!-- LISTE -->
+  <mat-list>
+    @for (file of paginatedFiles; track $index) {
+    <mat-list-item class="file-item">
+      <div matLine class="full-width horizontal">
+        <mat-icon class="file-info">{{ getFileIcon(file) }}</mat-icon>
+        <div class="vertical">
+          <span class="file-name"
+            >{{ truncateFileName(file.filename, 24) }}</span
+          >
+          @if (!isActive(file)) {
+          <span class="error">{{ humanizeExpiresAt(file) }}</span>
+          } @else {<span>{{ humanizeExpiresAt(file) }}</span>}
+        </div>
+        <span class="file-info"> {{ formatSize(file.size) }} </span>
+        @if (isActive(file)) {
+        <div>
+          <button
+            mat-raised-button
+            (click)="delete(file)"
+            aria-label="Supprimer un fichier"
+            class="btn-action"
+          >
+            <mat-icon>delete</mat-icon> Supprimer
+          </button>
+          <button
+            mat-raised-button
+            (click)="download(file)"
+            aria-label="Accéder au fichier"
+            class="btn-action"
+          >
+            <span>Accéder</span> <mat-icon>arrow_right_alt</mat-icon>
+          </button>
+        </div>
+        }@else {
+        <span class="text-grey"
+          >Ce fichier a expiré, il n'est plus stocké chez nous</span
+        >
+        }
+      </div>
+    </mat-list-item>
+    } @empty {
+    <mat-list-item class="empty-state">
+      <mat-icon matListIcon>folder_open</mat-icon>
+      <span
+        >Aucun fichier {{ filter === 'active' ? 'actif' : filter === 'expired' ?
+        'expiré' : '' }}</span
+      >
+    </mat-list-item>
+    }
+  </mat-list>
+
+  <!-- Pagination -->
+  <mat-paginator
+    [length]="filteredFiles.length"
+    [pageSize]="pageSize"
+    [showFirstLastButtons]="true"
+    (page)="onPageChange($event)"
+    aria-label="Pagination fichiers"
+  >
+  </mat-paginator>
+</mat-card>
