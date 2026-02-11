@@ -115,10 +115,7 @@ public class SecurityConfig {
                         "/auth/register",
                         "/auth/logout",
                         "/actuator/**",
-                        "/files/public/**",
-                        // ════════════════════════════════════════════════════
-                        // GET Endpoints, ready only (safe methods)
-                        // ════════════════════════════════════════════════════
+                        "/files/**",
                         "/auth/me"))
         // Add filter to send the CSRF token to frontend
         .addFilterAfter(new CsrfCookieFilter(), LogoutFilter.class)
@@ -156,7 +153,7 @@ public class SecurityConfig {
                         "/auth/logout",
                         "/auth/me",
                         "/actuator/**",
-                        "/files/public/**",
+                        "/files/download/**",
                         "/error")
                     .permitAll()
                     // Other paths need authentification

@@ -1,7 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"]
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"],
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noUnusedLabels": false,
+    "allowUnusedLabels": true,
+    "allowUnreachableCode": true
   },
   "include": ["../../src/**/*.spec.ts", "../../config/tooling/vitest.setup.ts"]
 }

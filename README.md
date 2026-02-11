@@ -1,19 +1,19 @@
 # DataShare
 
-**DataShare** is a full-stack application with a **Spring Boot 4 API (`api`)** and an **Angular frontend (`web`)**, designed with strong testing, security, and automation practices.
+**DataShare** is a full-stack application with a **Spring Boot 4** backend API and an **Angular 21** frontend web application, designed with strong testing, security, and automation practices.
 
 ## Table of Contents
 
 1. [Monorepo Structure](#monorepo-structure)
 2. [Requirements](#requirements)
-3. [Environment Setup](#environment-setup)
-4. [Running the Applications](#running-the-applications)
+3. [Quick start](#quick-start)
+4. [Main features](#main-features)
 5. [Quality](docs/QUALITY.md)
 6. [Testing](docs/TESTING.md)
 7. [Maintenance](docs/MAINTENANCE.md)
 8. [Performance](docs/PERFORMANCE.md)
 9. [Security](docs/SECURITY.md)
-10. [Quick reference (Makefile commands)](docs/QUICK-REFERENCE.md)
+10. [Quick reference guide (Makefile commands)](docs/QUICK-REFERENCE.md)
 
 ---
 
@@ -21,16 +21,14 @@
 
 ```
 datashare/
-├── datashare-api/ # Spring Boot API
-├── datashare-web/ # Angular Web app
-│ └── tests/config/ # Jest / Cypress / Playwright configs
-├── compose.yaml # API dependencies (PostgreSQL, S3, etc.)
-├── scripts/bump-version.sh # Script to bump SemVer version
-│ └── git-hooks # git hooks scripts
-├── VERSION # Current application version
-├── .env # Environment variables
-├── openapi.yaml # OpenAPI specification
-├── Makefile # Commands for starting apps, building, testing, linting, versioning
+├── datashare-api/............................ Spring Boot API
+├── datashare-web/............................ Angular Web app
+├── scripts/.................................. scripts folder
+├── compose.yaml.............................. Local environment (PostgreSQL, localstack)
+├── VERSION................................... Current application version
+├── .env...................................... Development Environment variables file
+├── openapi.yaml.............................. OpenAPI specification
+├── Makefile.................................. Makefile for build tasks automation
 ```
 
 ---
@@ -38,10 +36,10 @@ datashare/
 ## Requirements
 
 - **Node.js** >= 20.x
-- **npm** >= 10.x
-- **Java 21** (Spring Boot 4)
+- **Java 21** 
 - **Maven** >= 4.x (wrapper included in `datashare-api`)
 - **Docker & Docker Compose**
+- **AWS command line tool** 
 - **VS Code** (recommended IDE)
 
 ---
@@ -83,7 +81,14 @@ make start-web
 - Start everything together
 ```bash
 make start-all
-```
+``` 
+
+## Main features
+- Upload file using presigned S3 URL
+- File metadata storage in PostgreSQL database
+- User upload list
+- Secure download from random token
+- Authentication via cookie HttpOnly
 
 ---
 

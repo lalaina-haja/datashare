@@ -13,12 +13,12 @@
 |  | `make lint-web` | Web lint (Angular Lint) |
 |  | `make lint` | Lint both API + Web |
 | **API Tests** | `make test-api-unit` | API unit tests |
-|  | `make test-api-it` | API integration tests |
-| **Web Tests** | `make test-web-unit` | Web unit tests (Jest) |
-|  | `make test-web-it` | Web integration tests |
-| **End to End Tests** | `make test-e2e` | End-to-end tests (Cypress / Playwright) |
+|  | `make test-api-integ` | API integration tests |
+| **Web Tests** | `make test-web-unit` | Web unit tests (Vitest) |
+|  | `make test-web-integ` | Web integration tests (Vitest) |
+| **End to End Tests** | `make test-e2e` | End-to-end tests (Cypress + Cucumber) |
 | **Combined Tests** | `make test-unit` | All unit tests |
-|  | `make test-it` | All integration tests |
+|  | `make test-integ` | All integration tests |
 |  | `make test-all` | All tests |
 | **Versioning** | `make version` | Show the applciation current version |
 |  | `make bump-version TYPE=patch/minor/major` | Bump version  |

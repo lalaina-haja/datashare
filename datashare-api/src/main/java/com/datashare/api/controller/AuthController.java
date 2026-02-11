@@ -85,7 +85,7 @@ public class AuthController {
   /**
    * Gets the current user
    *
-   * @param userDetails
+   * @param authentication the authentication from JWT filter
    * @return
    */
   @GetMapping("/me")

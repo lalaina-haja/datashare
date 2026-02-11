@@ -171,6 +171,54 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   /**
+   * Handles InvalidTokenException
+   *
+   * <p>Returns a 401 Unauthorised response with error message.
+   *
+   * @param exception the caught InvalidTokenException
+   * @param request the current web request
+   * @return a ResponseEntity with error details and 401 status code
+   */
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ExceptionHandler(value = {InvalidTokenException.class})
+  protected ResponseEntity<Object> handleInvalidTokenException(
+      InvalidTokenException exception, WebRequest request) {
+
+    logError(exception);
+
+    return handleExceptionInternal(
+        exception,
+        ApiError.of(HttpStatus.UNAUTHORIZED.value(), exception.getMessage(), request),
+        new HttpHeaders(),
+        HttpStatus.UNAUTHORIZED,
+        request);
+  }
+
+  /**
+   * Handles UserNotFileOwnerException
+   *
+   * <p>Returns a 403 Forbidden response with error message.
+   *
+   * @param exception the caught UserNotFileOwnerException
+   * @param request the current web request
+   * @return a ResponseEntity with error details and 403 status code
+   */
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ExceptionHandler(value = {UserNotFileOwnerException.class})
+  protected ResponseEntity<Object> handleUserNotFileOwnerException(
+      UserNotFileOwnerException exception, WebRequest request) {
+
+    logError(exception);
+
+    return handleExceptionInternal(
+        exception,
+        ApiError.of(HttpStatus.FORBIDDEN.value(), exception.getMessage(), request),
+        new HttpHeaders(),
+        HttpStatus.FORBIDDEN,
+        request);
+  }
+
+  /**
    * Handles all other exceptions not specifically handled by other handlers.
    *
    * <p>Returns a 500 Internal Server Error response as a fallback for unexpected exceptions.

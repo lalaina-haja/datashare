@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content data-testid="alert-dialog">
+  <!-- Success or simple Error message -->
+  @if (data.message) {
+  <p data-testid="alert-message">{{ data.message }}</p>
+  }
+
+  <!-- Errors details -->
+  @if (data.errors) {
+  <div>Error details:</div>
+  <ul>
+    @for (error of errorsEntries(); track error.key) {
+    <li><strong>{{ error.key }}</strong> : {{ error.value }}</li>
+    }
+  </ul>
+  }
+  <!-- Extra error informations -->
+  @if (data.status) {
+  <div>status: {{ data.status }}</div>
+  } @if (data.path) {
+  <div>path: {{ data.path }}</div>
+  } @if (data.timestamp) {
+  <div>timestamp: {{ data.timestamp }}</div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-raised-button
+    class="btn-primary"
+    mat-dialog-close
+    data-testid="alert-ok-button"
+  >
+    OK
+  </button>
+</mat-dialog-actions>

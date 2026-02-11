@@ -1,21 +1,40 @@
 <mat-toolbar color="primary" class="header">
-  <div class="logo">
+  <button mat-icon-button class="logo" (click)="home()">
     <span>DataShare</span>
-  </div>
+  </button>
+
   <span class="spacer"></span>
 
   @if (isAuthenticated()) {
-  <mat-icon>account_circle</mat-icon>
-  <span class="user">{{ currentUser()?.email }}</span>
   <button
-    data-testid="connection-button"
-    mat-raised-button
-    color="accent"
-    class="btn-connecter"
-    (click)="logout()"
+    mat-icon-button
+    data-testid="user-button"
+    [matMenuTriggerFor]="userMenu"
+    aria-label="Menu utilisateur"
+    class="user-menu-trigger"
   >
-    Se deconnecter
+    <mat-icon>account_circle</mat-icon>
+    <span class="username"> {{ currentUser()?.email }} </span>
   </button>
+  <!-- Menu déroulant -->
+  <mat-menu #userMenu="matMenu" class="user-menu" panelClass="custom-user-menu">
+    <button mat-menu-item (click)="history()">
+      <mat-icon>dashboard</mat-icon>
+      <span>Mon espace</span>
+    </button>
+
+    <button mat-menu-item (click)="upload()">
+      <mat-icon>cloud_upload</mat-icon>
+      <span>Ajouter un fichier</span>
+    </button>
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item data-testid="connection-button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Se deconnecter</span>
+    </button>
+  </mat-menu>
   } @else {
   <button
     data-testid="connection-button"

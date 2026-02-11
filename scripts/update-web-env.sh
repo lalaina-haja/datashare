@@ -32,6 +32,7 @@ APP_HOST=$(grep '^APP_HOST=' "$ENV_FILE" | cut -d'=' -f2 | xargs)
 APP_NAME=$(grep '^APP_NAME=' "$ENV_FILE" | cut -d'=' -f2 | xargs)
 TEST_EMAIL=$(grep '^TEST_EMAIL=' "$ENV_FILE" | cut -d'=' -f2 | xargs)
 TEST_PASS=$(grep '^TEST_PASS=' "$ENV_FILE" | cut -d'=' -f2 | xargs)
+BUCKET_NAME=$(grep '^AWS_S3_BUCKET=' "$ENV_FILE" | cut -d'=' -f2 | xargs)
 
 # Defaults & overrides
 API_PORT=${API_PORT:-8080}
@@ -42,6 +43,7 @@ API_URL=${APP_HOST}:${API_PORT}
 BASE_URL=${APP_HOST}:${WEB_PORT}
 TEST_EMAIL=${CYPRESS_TEST_EMAIL:-${TEST_EMAIL}}
 TEST_PASS=${CYPRESS_TEST_PASS:-${TEST_PASS}}
+BUCKET_NAME=${BUCKET_NAME:-datashare-bucket}
 
 echo -e "${TAG} Updating environment.ts"
 echo -e "${TAG}   APP_NAME=${KEYWORD}$APP_NAME${NC}"
@@ -51,16 +53,18 @@ echo -e "${TAG}   API_URL=${KEYWORD}$API_URL${NC}"
 echo -e "${TAG}   BASE_URL=${KEYWORD}$BASE_URL${NC}"
 echo -e "${TAG}   TEST_EMAIL=${KEYWORD}$TEST_EMAIL${NC}"
 echo -e "${TAG}   TEST_PASS=${KEYWORD}$TEST_PASS${NC}"
+echo -e "${TAG}   BUCKET_NAME=${KEYWORD}$BUCKET_NAME${NC}"
 
-# Replace apiUrl and baseUrl in environment.ts
+# Replace values in environment.ts
 sed -E \
-  -e "s|appName:.*|appName: '${APP_NAME}',|" \
+  -e "s|appName:.*|appName: \"${APP_NAME}\",|" \
   -e "s|apiPort:.*|apiPort: ${API_PORT},|" \
   -e "s|webPort:.*|webPort: ${WEB_PORT},|" \
   -e "s|apiUrl:.*|apiUrl: \`${APP_HOST}:${API_PORT}\`,|" \
   -e "s|baseUrl:.*|baseUrl: \`${APP_HOST}:${WEB_PORT}\`,|" \
-  -e "s|testEmail:.*|testEmail: '${TEST_EMAIL}',|" \
-  -e "s|testPass:.*|testPass: '${TEST_PASS}',|" \
+  -e "s|testEmail:.*|testEmail: \"${TEST_EMAIL}\",|" \
+  -e "s|testPass:.*|testPass: \"${TEST_PASS}\",|" \
+  -e "s|bucketName:.*|bucketName: \"${BUCKET_NAME}\",|" \
   "$ENV_LOCAL_FILE" > "$ENV_LOCAL_FILE.tmp" \
   && mv "$ENV_LOCAL_FILE.tmp" "$ENV_LOCAL_FILE"
 

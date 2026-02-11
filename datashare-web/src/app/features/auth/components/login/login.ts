@@ -1,7 +1,7 @@
 // src/app/features/auth/components/login/login.ts
 
 // Angular modules
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   ReactiveFormsModule,
@@ -21,12 +21,12 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatDialog } from "@angular/material/dialog";
 
 // Services and Models
 import { AuthService } from "../../services/auth.service";
 import { AuthRequest } from "../../models/auth.request.model";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { AlertDialog } from "../../../../shared/alert-dialog/alert-dialog";
+import { AlertDialog } from "../../../../shared/dialog/components/alert-dialog/alert-dialog";
 
 /** Login Component */
 @Component({
@@ -44,7 +44,7 @@ import { AlertDialog } from "../../../../shared/alert-dialog/alert-dialog";
   templateUrl: "./login.html",
   styleUrl: "./login.scss",
 })
-export class Login {
+export class Login implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
@@ -55,11 +55,20 @@ export class Login {
   readonly currentUser = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly message = this.authService.message;
+  readonly error = this.authService.errorStatus;
 
   loginForm: FormGroup = this.fb.group({
     email: ["", [Validators.required, Validators.email]],
     password: ["", Validators.required],
   });
+
+  ngOnInit() {
+    this.authService.checkAuthStatus().subscribe();
+    if (this.authService.isAuthenticated()) {
+      console.log("Already authenticated, redirecting to /home");
+      this.router.navigate(["/home"]);
+    }
+  }
 
   loading = false;
   showPassword = false;
@@ -84,6 +93,7 @@ export class Login {
     }
 
     this.loading = true;
+    this.authService.clearMessage();
 
     const payload: AuthRequest = {
       email: this.loginForm.value.email,
@@ -98,12 +108,12 @@ export class Login {
           this.loading = false;
           console.log("Login payload:", payload);
           this.authService.clearMessage();
-          this.router.navigate(["/files"]);
+          this.router.navigate(["/home"]);
         },
         error: (err: HttpErrorResponse) => {
           this.loading = false;
           console.error("Login error:", err);
-          if (!err?.error) {
+          if (!err?.error?.message) {
             this.dialog.open(AlertDialog, {
               panelClass: "rounded-dialog",
               data: {
@@ -115,7 +125,4 @@ export class Login {
         },
       });
   }
-}
-export class DialogData {
-  data = inject(MAT_DIALOG_DATA);
 }

@@ -18,6 +18,15 @@ security:
     expiration: 60
     issuer: datashare-api
 
+aws:
+  s3:
+    endpoint: http://test
+    region: eu-west-3
+    bucket: test-bucket
+    access-key: test 
+    secret-key: test
+    path-style-access: true
+    
 logging:
   level:
     org:

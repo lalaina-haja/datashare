@@ -2,6 +2,7 @@
   background-color: #1b1a1a !important;
   color: #ffffff !important;
   border-radius: 8px !important;
+  padding: 0 40px;
 
   &:hover {
     background-color: #363535 !important;
@@ -11,18 +12,38 @@
 
 mat-toolbar {
   flex-direction: row;
+  padding: 0;
+  width: 100%;
+
   .logo {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: 500;
   }
+
   .spacer {
-    flex: 1;
+    flex: 1 1 100% !important;
   }
 }
 
-.user {
-  padding: 12px;
+.username {
+  margin-left: 8px;
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: auto;
+  border-radius: 12px;
+  background: #1b1a1a;
+  color: #ffffff;
+}
+
+.user-menu-trigger:hover {
+  background: #363535;
 }

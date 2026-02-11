@@ -7,6 +7,8 @@ export interface ApiEndpoints {
   logout: string;
   me: string;
   files: string;
+  upload: string;
+  download: string;
 }
 
 @Injectable({
@@ -23,13 +25,23 @@ export class ConfigService {
         logout: "/auth/logout",
         me: "/auth/me",
         files: "/files",
+        upload: "/files/upload",
+        download: "/files/download",
       } as const,
     },
     app: {
+      baseUrl: environment.baseUrl,
       name: environment.appName,
       production: environment.production,
     },
   };
+
+  /**
+   * WEB base URL
+   */
+  get webBaseUrl(): string {
+    return this.config.app.baseUrl;
+  }
 
   /**
    * API base URL

@@ -9,4 +9,5 @@ export const environment = {
   apiPort: 8081,
   testEmail: "test@example.com",
   testPass: "Passw0rd!",
+  bucketName: "datashare-bucket",
 };

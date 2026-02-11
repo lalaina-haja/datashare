@@ -188,7 +188,7 @@ describe("AuthService (unit)", () => {
       const mockUser: User = { email: "me@test.com", authorities: ["USER"] };
       (mockConfigService.getEndpointUrl as any).mockReturnValue("/auth/me");
 
-      service.me().subscribe(() => {
+      service.checkAuthStatus().subscribe(() => {
         expect(service.user()).toEqual(mockUser);
       });
 
@@ -201,7 +201,7 @@ describe("AuthService (unit)", () => {
     it("should set user to null in case of error", () => {
       (mockConfigService.getEndpointUrl as any).mockReturnValue("/auth/me");
 
-      service.me().subscribe({
+      service.checkAuthStatus().subscribe({
         error: () => {
           expect(service.user()).toBeNull();
         },
@@ -222,11 +222,11 @@ describe("AuthService (unit)", () => {
   // -------------------------------------------------------
   describe("init()", () => {
     it("should call me() on initialization", () => {
-      const meSpy = vi.spyOn(service, "me").mockReturnValue({
+      const meSpy = vi.spyOn(service, "checkAuthStatus").mockReturnValue({
         subscribe: vi.fn(),
       } as any);
 
-      service.init();
+      service.checkAuthStatus();
 
       expect(meSpy).toHaveBeenCalled();
     });

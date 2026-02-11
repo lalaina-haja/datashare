@@ -43,6 +43,9 @@ aws:
     endpoint: http://localhost:4566
     region: ${AWS_REGION}
     bucket: ${AWS_S3_BUCKET}
+    access-key: test 
+    secret-key: test
+    path-style-access: true
   cors:
     allowed-origins: http://localhost:${WEB_PORT:4200}
 

@@ -3,9 +3,11 @@
     <mat-card-title>Créer un compte</mat-card-title>
   </mat-card-header>
 
-  @if (message() && !isAuthenticated()) {
+  @if (message()) { @if (error()) {
   <mat-label class="error-message">{{ message() }}</mat-label>
-  }
+  } @else {
+  <mat-label class="succes-message">{{ message() }}</mat-label>
+  } }
 
   <!-- Formulaire -->
   <mat-card-content class="form-section">

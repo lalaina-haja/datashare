@@ -7,10 +7,21 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatCardModule } from "@angular/material/card";
+import { CommonModule } from "@angular/common";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatBadgeModule } from "@angular/material/badge";
 
 @Component({
   selector: "app-header",
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatCardModule],
+  imports: [
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    CommonModule,
+    MatMenuModule,
+    MatBadgeModule,
+  ],
   templateUrl: "./header.html",
   styleUrl: "./header.scss",
 })
@@ -21,6 +32,20 @@ export class Header {
   // AuthService signals
   readonly currentUser = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
+
+  showHistory = false;
+
+  home(): void {
+    this.router.navigate(["/home"]);
+  }
+
+  upload(): void {
+    this.router.navigate(["/files/upload"]);
+  }
+
+  history(): void {
+    this.router.navigate(["/files"]);
+  }
 
   login(): void {
     this.authService.clearMessage();

@@ -1,0 +1,99 @@
+.download-card {
+  background: #ffffff !important;
+  border-radius: 0 0 24px 24px;
+  width: 100%;
+  min-width: 420px;
+  max-width: 780px;
+  border-radius: 15px !important;
+  overflow: hidden;
+  padding: 0;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.title-section {
+  text-align: center;
+  padding: 2.5rem 2rem 1rem;
+}
+
+mat-card-title {
+  padding: 0;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  color: #222020;
+  margin: 0 !important;
+  width: 100%;
+}
+
+mat-card-header {
+  background: transparent !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 2rem 2rem 1rem !important;
+  text-align: center !important;
+}
+
+mat-card-content {
+  padding: 0 1.5rem;
+}
+
+::ng-deep .mat-mdc-card-header-text {
+  width: 100% !important;
+  margin-left: 0 !important;
+  text-align: center !important;
+}
+
+mat-card-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.btn-telecharger {
+  background: #f5cfbc !important;
+  color: #b65a2c !important;
+  border-radius: 12px !important;
+  border: 1px solid #b65a2c !important;
+  text-transform: none !important;
+  font-weight: 400 !important;
+  margin: auto;
+  width: auto;
+}
+
+.btn-telecharger:hover {
+  box-shadow: 0 0 24px #bba79b !important;
+}
+
+.file-preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: row;
+  margin: 1rem 0;
+}
+
+.file-info-text {
+  display: flex;
+  flex-direction: column;
+  margin: 0 1rem;
+}
+
+.file-expiration {
+  background-color: #fbebe5;
+  border: 1px solid coral;
+  border-radius: 8px;
+  min-height: 1.5rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  align-content: center;
+}
