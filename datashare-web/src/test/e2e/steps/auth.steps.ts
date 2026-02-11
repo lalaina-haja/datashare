@@ -1,6 +1,6 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-/** Login the test user */
+/** Log in the test user */
 Given("I am logged in", () => {
   cy.visit(`/login`);
   cy.getAppConfig().then((env) => {
@@ -14,6 +14,13 @@ Given("I am logged in", () => {
 
     cy.contains("button", `${env.testEmail}`).should("exist").and("be.visible");
   });
+});
+
+/** Log out the test user */
+Given("I am logged out", () => {
+  cy.get('[data-testid="user-button"]').click();
+  cy.get('[data-testid="connection-button"]').click();
+  cy.contains("button", "Se connecter").should("exist").and("be.visible");
 });
 
 /** Submit registration with email and password */
@@ -50,11 +57,9 @@ When(
 );
 
 /** Logout */
-When("I logout", () => {
-  cy.getAppConfig().then((env) => {
-    cy.get('[data-testid="user-button"]').click();
-    cy.get('[data-testid="connection-button"]').click();
-  });
+When("I log out", () => {
+  cy.get('[data-testid="user-button"]').click();
+  cy.get('[data-testid="connection-button"]').click();
 });
 
 /** Logged in = Connexion button shows "Se deconnecter" */

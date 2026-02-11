@@ -29,5 +29,5 @@ Feature: Authentication
 
   Scenario: Logout
     Given I am logged in
-    When I logout
+    When I log out
     Then I should be logged out

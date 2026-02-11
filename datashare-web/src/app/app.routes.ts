@@ -34,7 +34,6 @@ export const routes: Routes = [
       {
         path: "d/:token",
         component: Download,
-        canActivate: [authGuard],
       },
     ],
   },

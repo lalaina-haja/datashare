@@ -9,14 +9,15 @@ Feature: User's files
   Scenario: Default list view
     Then I should see the title "Mes fichiers"
     And I should see the files list
-    And the selected filter is "Tous"
+    And the selected filter is "Actifs"
+    And only active files are displayed
     And the list pagination is visible
 
-  Scenario: Filter on active files
-    When I select filter "Actifs"
-    Then only active files are displayed
+  Scenario: Filter on all files
+    When I select filter "Tous"
+    Then all files are displayed
 
-  Scenario: Filtrer les fichiers expirés
+  Scenario: Filter on expired files
     When I select filter "Expirés"
     Then only expired files are displayed
 

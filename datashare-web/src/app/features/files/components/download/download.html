@@ -1,0 +1,46 @@
+<mat-card class="download-card">
+  <mat-card-header class="title-section">
+    <mat-card-title>Télécharger un fichier</mat-card-title>
+  </mat-card-header>
+
+  <!-- Message -->
+  @if ( message() ) { @if (error() ) {
+  <mat-label class="error-message">{{ message() }}</mat-label>
+  } @else {
+  <mat-label class="success-message">{{ message() }}</mat-label>
+  } }
+
+  <mat-card-content>
+    <div class="file-preview">
+      @if (file()) {
+      <div class="file-info" aria-live="polite" data-testid="file-info">
+        <mat-icon class="file-icon" data-testid="file-icon"
+          >{{ getFileIcon() }}</mat-icon
+        >
+        <div class="file-info-text">
+          <span data-testid="file-name"
+            >{{ truncateFileName(file()!.filename, 30) }}</span
+          >
+          <span data-testid="file-size">{{ formatSize(file()!.size) }}</span>
+        </div>
+      </div>
+      <span class="file-expiration" data-testid="file-expiration">
+        {{ messageExpiration(file()!) }}
+      </span>
+      }
+    </div>
+    <mat-card-actions>
+      @if (file() && isActive(file()!)) {
+      <button
+        mat-raised-button
+        class="btn-telecharger"
+        (click)="download()"
+        data-testid="btn-telecharger"
+        aria-label="Télécharger le fichier"
+      >
+        <mat-icon>cloud_download</mat-icon> Télécharger
+      </button>
+      }
+    </mat-card-actions>
+  </mat-card-content>
+</mat-card>

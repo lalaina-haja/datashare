@@ -78,3 +78,8 @@ Then("only expired files are displayed", () => {
     cy.wrap($item).find("mat-icon").contains("delete").should("not.exist");
   });
 });
+
+/** Check all files are displayed */
+Then("all files are displayed", () => {
+  cy.get("mat-list-item.file-item").should("have.length", 3);
+});

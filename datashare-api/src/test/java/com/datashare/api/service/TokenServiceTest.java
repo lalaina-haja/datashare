@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.datashare.api.entities.File;
 import com.datashare.api.entities.Token;
 import com.datashare.api.handler.InvalidTokenException;
+import com.datashare.api.repository.FileRepository;
 import com.datashare.api.repository.TokenRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -23,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class TokenServiceTest {
 
   @Mock TokenRepository tokenRepository;
+
+  @Mock FileRepository fileRepository;
 
   @InjectMocks TokenService tokenService;
 
@@ -42,7 +45,7 @@ public class TokenServiceTest {
     // Assert
     assertNotNull(token.getTokenString());
     assertEquals(6, token.getTokenString().length());
-    verify(tokenRepository, times(1)).save(any(Token.class));
+    verify(fileRepository, times(1)).save(any());
   }
 
   /** Test that generated token has correct length */
@@ -117,13 +120,13 @@ public class TokenServiceTest {
     Token token = tokenService.generateToken(file, expiresAt);
 
     // Assert
-    ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
-    verify(tokenRepository, times(1)).save(tokenCaptor.capture());
+    ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File.class);
+    verify(fileRepository, times(1)).save(fileCaptor.capture());
 
-    Token savedToken = tokenCaptor.getValue();
-    assertEquals(token.getTokenString(), savedToken.getTokenString());
-    assertEquals(file, savedToken.getFile());
-    assertEquals(expiresAt, savedToken.getExpiresAt());
+    File savedFile = fileCaptor.getValue();
+    assertEquals(token.getTokenString(), savedFile.getToken().getTokenString());
+    assertEquals(file, savedFile.getToken().getFile());
+    assertEquals(expiresAt, savedFile.getToken().getExpiresAt());
   }
 
   /** Test successful token validation */
@@ -268,7 +271,7 @@ public class TokenServiceTest {
     assertNotNull(token1.getTokenString());
     assertNotNull(token2.getTokenString());
     assertNotEquals(token1.getTokenString(), token2.getTokenString());
-    verify(tokenRepository, times(2)).save(any(Token.class));
+    verify(fileRepository, times(2)).save(any(File.class));
   }
 
   /** Test that token service correctly handles different expiration times */
@@ -284,10 +287,10 @@ public class TokenServiceTest {
     tokenService.generateToken(file, expiresAt);
 
     // Assert
-    ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
-    verify(tokenRepository, times(1)).save(tokenCaptor.capture());
+    ArgumentCaptor<File> tokenCaptor = ArgumentCaptor.forClass(File.class);
+    verify(fileRepository, times(1)).save(tokenCaptor.capture());
 
-    Token savedToken = tokenCaptor.getValue();
+    Token savedToken = tokenCaptor.getValue().getToken();
     assertEquals(expiresAt, savedToken.getExpiresAt());
   }
 }

@@ -76,7 +76,7 @@ export class Files implements OnInit {
   }
 
   files = signal<FileMetadata[]>([]);
-  filter: string = "all";
+  filter: string = "active";
 
   // Pagination
   @ViewChild(MatPaginator) paginator!: MatPaginator;
