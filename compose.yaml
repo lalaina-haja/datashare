@@ -29,12 +29,17 @@ services:
       HOSTNAME_EXTERNAL: localhost
       AWS_ACCESS_KEY_ID: local
       AWS_SECRET_ACCESS_KEY: local
-      INIT_AWSCLI_COMMANDS: "aws --endpoint-url=http://localhost:4566 s3 mb s3://${AWS_S3_BUCKET} --region ${AWS_REGION}"
+      S3_FORCE_PATH_STYLE: true
+
     ports:
       - "4566:4566"
     volumes:
       - s3-data:/var/lib/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./scripts/init-s3-bucket.sh:/etc/localstack/init/ready.d/init-s3-bucket.sh"
+      - "./.env:/tmp/config/.env:ro"
+      - "./cors.json:/tmp/config/cors.json:ro"
+
     healthcheck:
       test: ["CMD-SHELL", "awslocal s3 ls || exit 1"]
 

@@ -1,8 +1,12 @@
 package com.datashare.api.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -16,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 /**
  * Unit tests for the JwtService class.
@@ -171,5 +176,88 @@ public class JwtServiceTest {
     // WHEN extracting the username THEN got email
     String username = jwtService.extractUsername(token);
     assertThat(username).isEqualTo(EMAIL);
+  }
+
+  /** Test that getExpiresAt returns expiration when token valid */
+  @Test
+  @DisplayName("UNIT-JWT-007: Should returns expiration")
+  void getExpiresAt_shouldReturnExpiration_whenTokenValid() {
+
+    Instant exp = Instant.now().plusSeconds(3600);
+    Jwt jwt = mock(Jwt.class);
+    when(jwt.getExpiresAt()).thenReturn(exp);
+    when(jwtDecoder.decode("valid")).thenReturn(jwt);
+
+    assertEquals(exp, jwtService.getExpiresAt("valid"));
+  }
+
+  /** Test that getExpiredAt returns null when token invalid */
+  @Test
+  @DisplayName("UNIT-JWT-008: Should expiration null when token invalid")
+  void getExpiresAt_shouldReturnNull_whenTokenInvalid() {
+
+    when(jwtDecoder.decode("invalid")).thenThrow(new JwtException("bad token"));
+
+    assertNull(jwtService.getExpiresAt("invalid"));
+  }
+
+  /** Test that getExpiresIn returns positive value when token valid */
+  @Test
+  @DisplayName("UNIT-JWT-009: Should return positive expiresIn when token valid")
+  void getExpiresIn_shouldReturnPositiveValue_whenTokenValid() {
+
+    Instant exp = Instant.now().plusSeconds(120);
+    Jwt jwt = mock(Jwt.class);
+    when(jwt.getExpiresAt()).thenReturn(exp);
+    when(jwtDecoder.decode("valid")).thenReturn(jwt);
+
+    Long result = jwtService.getExpiresIn("valid");
+    assertTrue(result > 0);
+  }
+
+  /** Test that getExpiresIn returns zero when token invalid */
+  @Test
+  @DisplayName("UNIT-JWT-010: Should return zero expiresIn when token invalid")
+  void getExpiresIn_shouldReturnZero_whenTokenInvalid() {
+
+    when(jwtDecoder.decode("invalid")).thenThrow(new JwtException("bad token"));
+
+    assertEquals(0L, jwtService.getExpiresIn("invalid"));
+  }
+
+  /** Test that isTokenExpired returns true when token is expired */
+  @Test
+  @DisplayName("UNIT-JWT-011: Should return true with isTokenExpired when token expired")
+  void isTokenExpired_shouldReturnTrue_whenExpired() {
+
+    Instant exp = Instant.now().minusSeconds(10);
+    Jwt jwt = mock(Jwt.class);
+    when(jwt.getExpiresAt()).thenReturn(exp);
+    when(jwtDecoder.decode("expired")).thenReturn(jwt);
+
+    assertTrue(jwtService.isTokenExpired("expired"));
+  }
+
+  /** Test that isTokenExpired returns false when token is not expired */
+  @Test
+  @DisplayName("UNIT-JWT-012: Should return false with isTokenExpired when token not expired")
+  void isTokenExpired_shouldReturnFalse_whenNotExpired() {
+
+    Instant exp = Instant.now().plusSeconds(3600);
+    Jwt jwt = mock(Jwt.class);
+    when(jwt.getExpiresAt()).thenReturn(exp);
+    when(jwtDecoder.decode("valid")).thenReturn(jwt);
+
+    assertFalse(jwtService.isTokenExpired("valid"));
+  }
+
+  /** Test that isTokenExpired returns true when token is invalid */
+  @Test
+  @DisplayName("UNIT-JWT-013: Should return true with isTokenExpired when token is invalid")
+  void isTokenExpired_shouldReturnTrue_whenTokenInvalid() {
+
+    when(jwtDecoder.decode("invalid")).thenThrow(new JwtException("bad token"));
+
+    assertTrue(jwtService.isTokenExpired("invalid"));
   }
 }

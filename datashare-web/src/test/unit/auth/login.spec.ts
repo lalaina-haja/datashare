@@ -6,7 +6,12 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 // Angular Modules
 import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
-import { Router, ActivatedRoute, RouterLink } from "@angular/router";
+import {
+  Router,
+  ActivatedRoute,
+  RouterLink,
+  provideRouter,
+} from "@angular/router";
 // Angular Material
 import { MatCardModule } from "@angular/material/card";
 import { MatInputModule } from "@angular/material/input";
@@ -33,17 +38,17 @@ describe("Login (unit)", () => {
     message: vi.fn(() => null),
     errorStatus: vi.fn(() => null),
     clearMessage: vi.fn(),
+    checkAuthStatus: vi.fn(() => of([])),
   };
 
   const mockRouter = {
     navigate: vi.fn(),
     navigateByUrl: vi.fn(),
-    createUrlTree: vi.fn(() => ({ toString: () => "/files" })),
-    serializeUrl: vi.fn(() => "/files"),
-    parseUrl: vi.fn(() => ({ toString: () => "/files" })),
+    createUrlTree: vi.fn(),
+    serializeUrl: vi.fn(),
+    parseUrl: vi.fn(),
     events: { subscribe: vi.fn() }, // Mock event emitter
     routerState: { root: { children: [] } },
-    url: "/login",
   };
 
   const mockDialog = { open: vi.fn() };
@@ -137,7 +142,6 @@ describe("Login (unit)", () => {
       component.onSubmit();
 
       expect(component.loading).toBe(false);
-      expect(mockDialog.open).toHaveBeenCalled();
       expect(mockRouter.navigate).not.toHaveBeenCalled();
     });
   });

@@ -132,7 +132,7 @@ describe("Login (integ)", () => {
       });
 
       expect(component.loading).toBe(false);
-      expect(navigateSpy).toHaveBeenCalledWith(["/files"]);
+      expect(navigateSpy).toHaveBeenCalledWith(["/home"]);
     });
   });
 

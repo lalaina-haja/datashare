@@ -1,13 +1,16 @@
 // src/app/features/auth/services/auth.service.ts
+
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { catchError, Observable, tap, throwError } from "rxjs";
+import { Router } from "@angular/router";
+import { catchError, Observable, of, take, tap, throwError } from "rxjs";
+
 import { ConfigService } from "../../../core/services/config.service";
-import { AuthSignals } from "../signals/auth.signal";
+import { UserSignals } from "../../../core/signals/user.signals";
+import { MessageSignals } from "../../../core/signals/message.signals";
 import { AuthRequest } from "../models/auth.request.model";
 import { AuthResponse } from "../models/auth.response.model";
 import { User } from "../../../core/models/user.model";
-import { Router } from "@angular/router";
 
 /**
  * AuthService
@@ -28,15 +31,16 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly config = inject(ConfigService);
-  private readonly signals = new AuthSignals();
+  private readonly userSignals = new UserSignals();
+  private readonly messageSignals = new MessageSignals();
 
   /** Published signals */
-  user = this.signals.user;
-  isAuthenticated = this.signals.isAuthenticated;
-  message = this.signals.message;
-  errorStatus = this.signals.errorStatus;
-  errorPath = this.signals.errorPath;
-  errorTimestamp = this.signals.errorTimestamp;
+  user = this.userSignals.user;
+  isAuthenticated = this.userSignals.isAuthenticated;
+  message = this.messageSignals.message;
+  errorStatus = this.messageSignals.errorStatus;
+  errorPath = this.messageSignals.errorPath;
+  errorTimestamp = this.messageSignals.errorTimestamp;
 
   /**
    * Register a new user
@@ -48,18 +52,12 @@ export class AuthService {
       })
       .pipe(
         tap((response) => {
-          this.message.set(response.message || "Registration successful");
+          this.messageSignals.success(
+            response.message || "Registration successful",
+          );
         }),
         catchError((error) => {
-          this.message.set(
-            error.error?.errors?.email ||
-              error.error?.errors?.password ||
-              error.error?.message ||
-              "Registration failed",
-          );
-          this.errorStatus.set(error.error?.status || null);
-          this.errorPath.set(error.error?.path || null);
-          this.errorTimestamp.set(error.error?.timestamp || null);
+          this.messageSignals.error(error, "Registration failed");
 
           return throwError(() => error);
         }),
@@ -84,18 +82,10 @@ export class AuthService {
             authorities: response.authorities,
           };
           this.user.set(user);
-          this.message.set(response.message || "Login successful");
+          this.messageSignals.success(response.message || "Login successful");
         }),
         catchError((error) => {
-          this.message.set(
-            error.error?.errors?.email ||
-              error.error?.errors?.password ||
-              error.error?.message ||
-              "Login failed",
-          );
-          this.errorStatus.set(error.error?.status || null);
-          this.errorPath.set(error.error?.path || null);
-          this.errorTimestamp.set(error.error?.timestamp || null);
+          this.messageSignals.error(error, "Login failed");
 
           return throwError(() => error);
         }),
@@ -117,52 +107,44 @@ export class AuthService {
       .pipe(
         tap(() => {
           this.user.set(null);
-          this.message.set(null);
-          this.errorStatus.set(null);
-          this.errorPath.set(null);
-          this.errorTimestamp.set(null);
+          this.messageSignals.clear();
+
           this.router.navigate(["/home"]);
         }),
         catchError((error) => {
           this.user.set(null);
-          this.message.set(error.error?.message || "Logout error");
-          this.errorStatus.set(error.error?.status || null);
-          this.errorPath.set(error.error?.path || null);
-          this.errorTimestamp.set(error.error?.timestamp || null);
+          this.messageSignals.error(error, "Logout error");
+
           return throwError(() => error);
         }),
       );
   }
 
-  /**
-   * Checks the session at startup
-   * - Calls /auth/me
-   * - If valid cookie → update user signal
-   * - Else → user = null
-   */
-  me() {
-    return this.http
-      .get<User>(this.config.getEndpointUrl("me"), { withCredentials: true })
-      .pipe(
-        tap({
-          next: (user) => this.user.set(user),
-          error: () => this.user.set(null),
-        }),
-      );
+  constructor() {
+    this.checkAuthStatus();
   }
 
-  /**
-   * Initialises authentication at application startup
-   * To be called in main.ts or app.config.ts
-   */
-  init() {
-    this.me().subscribe();
+  checkAuthStatus(): Observable<User | null> {
+    return this.http
+      .get<User | null>(this.config.getEndpointUrl("me"), {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((user) => {
+          this.user.set(user);
+        }),
+        catchError(() => {
+          this.user.set(null);
+          return of(null);
+        }),
+        take(1),
+      );
   }
 
   /**
    * Reset message
    */
   clearMessage(): void {
-    this.message.set(null);
+    this.messageSignals.clear();
   }
 }

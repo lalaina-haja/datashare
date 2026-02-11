@@ -4,13 +4,11 @@
       <mat-card-title>Connexion</mat-card-title>
     </mat-card-header>
 
-    @if ( message() && !isAuthenticated()) {
+    @if ( message()) { @if (error()) {
     <mat-label class="error-message">{{ message() }}</mat-label>
-    } @if (isAuthenticated()) {
-    <mat-label class="success-message"
-      >Connected as {{ currentUser()?.email }}. Redirecting...</mat-label
-    >
-    }
+    } @else {
+    <mat-label class="success-message">{{ message() }}</mat-label>
+    } }
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
@@ -60,9 +58,7 @@
             type="submit"
             [disabled]="loginForm.invalid || loading"
           >
-            @if (loading) {
-            <mat-spinner diameter="20"></mat-spinner>
-            } @else { Connexion }
+            @if (loading) { Connexion en cours... } @else { Connexion }
           </button>
         </div>
       </form>

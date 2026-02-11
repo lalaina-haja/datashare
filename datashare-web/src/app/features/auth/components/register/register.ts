@@ -1,7 +1,7 @@
 // src/app/features/auth/components/register/register.ts
 
 // Angular core modules
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   ReactiveFormsModule,
@@ -22,7 +22,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 
 // Services and Models
 import { AuthService } from "../../services/auth.service";
@@ -47,7 +47,7 @@ import { createDialogForSuccessMessage } from "../../../../core/models/alert-dia
   templateUrl: "./register.html",
   styleUrls: ["./register.scss"],
 })
-export class Register {
+export class Register implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
@@ -58,9 +58,7 @@ export class Register {
   readonly currentUser = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly message = this.authService.message;
-  readonly errorStatus = this.authService.errorStatus;
-  readonly errorPath = this.authService.errorPath;
-  readonly errorTimestamp = this.authService.errorTimestamp;
+  readonly error = this.authService.errorStatus;
 
   registerForm: FormGroup = this.fb.group(
     {
@@ -103,6 +101,14 @@ export class Register {
     return this.registerForm.get("confirmPassword");
   }
 
+  ngOnInit() {
+    this.authService.checkAuthStatus().subscribe();
+    if (this.authService.isAuthenticated()) {
+      console.log("Already authenticated");
+      this.message.set("Connected as " + this.currentUser()?.email);
+    }
+  }
+
   login(): void {
     this.authService.clearMessage();
     this.router.navigate(["/login"]);
@@ -140,7 +146,7 @@ export class Register {
         error: (err: HttpErrorResponse) => {
           this.loading = false;
           console.error("Registration error:", err);
-          if (!err?.error) {
+          if (!err?.error?.message) {
             this.dialog.open(AlertDialog, {
               panelClass: "rounded-dialog",
               data: {
@@ -152,7 +158,4 @@ export class Register {
         },
       });
   }
-}
-export class DialogData {
-  data = inject(MAT_DIALOG_DATA);
 }

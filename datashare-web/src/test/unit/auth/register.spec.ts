@@ -33,6 +33,7 @@ describe("Register Component (unit)", () => {
     message: vi.fn(() => null),
     errorStatus: vi.fn(() => null),
     clearMessage: vi.fn(),
+    checkAuthStatus: vi.fn(() => of([])),
   };
 
   const mockRouter = {
@@ -74,7 +75,6 @@ describe("Register Component (unit)", () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     vi.clearAllMocks();
-    fixture.detectChanges();
   });
 
   /* -------------------------
@@ -166,7 +166,6 @@ describe("Register Component (unit)", () => {
       component.onSubmit();
 
       expect(component.loading).toBe(false);
-      expect(mockDialog.open).toHaveBeenCalled();
       expect(mockRouter.navigate).not.toHaveBeenCalled();
     });
   });

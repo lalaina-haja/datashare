@@ -1,1 +1,103 @@
-<p>upload works!</p>
+<mat-card class="upload-card">
+  <mat-card-header class="title-section">
+    <mat-card-title>Ajouter un fichier</mat-card-title>
+  </mat-card-header>
+
+  <!-- Message -->
+  @if ( message() && error() ) {
+  <mat-label class="error-message" aria-live="assertive"
+    >{{ message() }}</mat-label
+  >
+  }
+
+  <mat-card-content class="form-section">
+    <div class="horizontal">
+      <!-- Aperçu du fichier -->
+      <span class="flex-1">
+        @if (file()) {
+        <div class="file-preview" aria-live="polite" data-testid="file-preview">
+          <mat-icon class="file-icon" data-testid="file-icon"
+            >{{ getFileIcon() }}</mat-icon
+          >
+          <span class="file-name">{{ file()?.name }}</span>
+        </div>
+        }
+      </span>
+      <span>
+        <!-- Selection fichier -->
+        <input
+          #fileInput
+          type="file"
+          hidden
+          (change)="onFileSelected($event)"
+          accept=".pdf,.docx,.jpg,.png"
+          class="file-input"
+          data-testid="file-input"
+          aria-label="Sélectionner un fichier à téléverser"
+        />
+        <!-- Bouton charger -->
+        @if (!uploadSuccess()) {
+        <button
+          mat-raised-button
+          class="btn-charger"
+          (click)="triggerFileSelect(fileInput)"
+          data-testid="btn-charger"
+          aria-label="Charger un fichier"
+        >
+          Charger
+        </button>
+        }
+      </span>
+    </div>
+
+    <!-- Expiration -->
+    @if (uploadSuccess()) {
+    <p>
+      Félicitations, ton fichier sera conservé chez nous {{ fileExpiration() }}
+      !
+    </p>
+    <div class="link">
+      <a [href]="fileDownloadUrl()">{{ fileDownloadUrl() }}</a>
+    </div>
+    } @else {
+    <mat-label>Expiration (jours) </mat-label>
+    <mat-form-field appearance="outline" class="full-width">
+      <input
+        matInput
+        type="number"
+        min="1"
+        [value]="expirationDays()"
+        (input)="expirationDays.set($any($event.target).value)"
+        aria-label="Durée d'expiration en jours"
+      />
+    </mat-form-field>
+    }
+
+    <mat-card-actions>
+      @if (uploadSuccess()) {
+      <!-- Bouton copier le lien -->
+      <button
+        mat-raised-button
+        class="btn-copier"
+        data-testid="btn-copier"
+        aria-label="Copier le lien de téléchargement"
+        [cdkCopyToClipboard]="fileDownloadUrl()"
+      >
+        <mat-icon>content_copy</mat-icon> Copier le lien
+      </button>
+      } @else {
+      <!-- Bouton téléverser -->
+      <button
+        mat-raised-button
+        class="btn-televerser"
+        [disabled]="!file()"
+        (click)="upload()"
+        data-testid="btn-televerser"
+        aria-label="Téléverser le fichier sélectionné"
+      >
+        <mat-icon>cloud_upload</mat-icon> Téléverser
+      </button>
+      }
+    </mat-card-actions>
+  </mat-card-content>
+</mat-card>

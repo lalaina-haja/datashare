@@ -2,33 +2,15 @@
 
 html body {
   height: 100%;
-  margin: 0;
+  width: auto;
+  overflow: hidden; 
   font-family: Roboto, sans-serif;
   background: linear-gradient(to bottom, #d7a084 0%, #aa3c3c 100%) !important;
-}
-
-app-root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .rounded-dialog .mat-mdc-dialog-container {
   border-radius: 16px;
   overflow: hidden;
-}
-
-@keyframes dialogFade {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 .error-message {
@@ -41,4 +23,34 @@ app-root {
   color: rgb(14, 197, 57);
   padding: 12px;
   margin: auto;
+}
+
+.cdk-overlay-pane .mat-mdc-menu-panel { 
+  background-color: #fbebe5 !important; 
+  border-radius: 8px;
+}
+
+.cdk-overlay-pane .mat-mdc-menu-item { 
+  border: 1px solid transparent !important;
+  border-radius: 16px;
+  color: #b65a2c;
+  text-transform: none !important;
+  transition: 0.5s ease; 
+} 
+
+.cdk-overlay-pane .mat-mdc-menu-item:hover { 
+  transition: 0.5s ease; 
+  border: 1px solid #b65a2c !important;
+  box-shadow: 0 0 24px #bba79b !important;
+}
+
+
+.cdk-overlay-pane .mat-mdc-menu-divider { 
+  border-top: 3px solid #111111 !important; 
+  margin: 6px 0 !important; opacity: 1 !important;
+}
+
+.cdk-overlay-pane .mat-mdc-menu-item .mat-icon { 
+  color: #b65a2c !important; 
+  font-size: 20px; 
 }

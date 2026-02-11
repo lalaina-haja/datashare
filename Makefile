@@ -50,8 +50,8 @@ help:
 	@echo -e "$(F_KEYWORD)   make install-web          $(F_REGULAR)Install all Web dependencies"
 	@echo ""
 	@echo -e "$(F_TITLE)Linting:"
-	@echo -e "$(F_KEYWORD)   make lint-api             $(F_REGULAR)Run API lint (Compile / Spotless / Checkstyle)"
-	@echo -e "$(F_KEYWORD)   make lint-web             $(F_REGULAR)Run Web lint (Angular Lint / Prettier)"
+	@echo -e "$(F_KEYWORD)   make lint-api             $(F_REGULAR)Run API lint (Compile / Spotless)"
+	@echo -e "$(F_KEYWORD)   make lint-web             $(F_REGULAR)Run Web lint (ESLint / Prettier)"
 	@echo -e "$(F_KEYWORD)   make lint                 $(F_REGULAR)Run all lint checks (API + Web)"
 	@echo ""
 	@echo -e "$(F_TITLE)API Tests (Maven Surefire / Failsafe):"
@@ -140,7 +140,7 @@ start-all:
 	$(MAKE) start-web &
 
 # ============================
-# Linting (Angular / TypeScript / Checkstyle / SpotBugs / PMD)
+# Linting (ESLint / Prettier / Spotless )
 # ============================
 .PHONY: lint-web lint-api lint
 lint-web: install-web
@@ -148,7 +148,7 @@ lint-web: install-web
 	@cd $(WEB_DIR) && npm run lint -- --max-warnings=0 || echo -e "$(F_MESSAGE) Lint warnings tolerated$(F_REGULAR)"
 	@cd $(WEB_DIR) && npm run format:check || (npm run format && echo -e "$(F_MESSAGE) ✔ Prettier fixed$(F_REGULAR)")
 lint-api:
-	@echo -e "$(F_MESSAGE)Running datashare-api lint (Compile / Spotless / Checkstyle)...$(F_REGULAR)"
+	@echo -e "$(F_MESSAGE)Running datashare-api lint (Compile / Spotless)...$(F_REGULAR)"
 	@cd $(API_DIR) && ./mvnw compile -DskipTests -q
 	@cd $(API_DIR) && ./mvnw spotless:check -q || (./mvnw spotless:apply && echo -e "$(F_MESSAGE) ✔ Spotless fixed$(F_REGULAR)")
 lint: lint-api lint-web
