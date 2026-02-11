@@ -5,6 +5,7 @@ import { HttpClient } from "@angular/common/http";
 import { catchError, Observable, tap, throwError } from "rxjs";
 
 import { ConfigService } from "../../../core/services/config.service";
+import { AuthService } from "../../../features/auth/services/auth.service";
 import { PresignedUpload } from "../models/presigned-upload.model";
 import { MessageSignals } from "../../../core/signals/message.signals";
 import { FileMetadata } from "../models/metadata.model";
@@ -20,6 +21,7 @@ import { PresignedDownload } from "../models/presigned-download.model";
 export class FileService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(ConfigService);
+  private readonly authService = inject(AuthService);
   private readonly messageSignals = new MessageSignals();
 
   /** Published signals */
@@ -39,16 +41,19 @@ export class FileService {
     file: File,
     expirationDays?: number,
   ): Observable<PresignedUpload> {
+    const isAuth = this.authService.isAuthenticated();
+    const endpointKey: any = isAuth ? "upload" : "publicUpload";
+
     return this.http
       .post<PresignedUpload>(
-        this.config.getEndpointUrl("upload"),
+        this.config.getEndpointUrl(endpointKey as any),
         {
           filename: file.name,
           contentType: file.type,
           size: file.size,
           expirationDays,
         },
-        { withCredentials: true },
+        { withCredentials: isAuth },
       )
       .pipe(
         tap(() => {
@@ -106,13 +111,13 @@ export class FileService {
    * @returns file details
    */
   getPresignedDownloadUrl(token: string): Observable<PresignedDownload> {
+    const isAuth = this.authService.isAuthenticated();
+    const endpointKey = isAuth ? "download" : "publicDownload";
+
     return this.http
-      .get<PresignedDownload>(
-        `${this.config.getEndpointUrl("download")}/${token}`,
-        {
-          withCredentials: true,
-        },
-      )
+      .get<PresignedDownload>(`${this.config.getEndpointUrl(endpointKey)}/${token}`, {
+        withCredentials: isAuth,
+      })
       .pipe(
         tap(() => {
           this.message.set(null);

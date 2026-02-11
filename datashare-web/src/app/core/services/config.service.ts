@@ -8,7 +8,9 @@ export interface ApiEndpoints {
   me: string;
   files: string;
   upload: string;
+  publicUpload?: string;
   download: string;
+  publicDownload?: string;
 }
 
 @Injectable({
@@ -19,14 +21,16 @@ export class ConfigService {
     api: {
       baseUrl: environment.apiUrl,
       timeout: environment.timeout,
-      endpoints: {
+        endpoints: {
         register: "/auth/register",
         login: "/auth/login",
         logout: "/auth/logout",
         me: "/auth/me",
         files: "/files",
         upload: "/files/upload",
+        publicUpload: "/public/upload",
         download: "/files/download",
+        publicDownload: "/public/download",
       } as const,
     },
     app: {

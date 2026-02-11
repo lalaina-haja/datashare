@@ -15,6 +15,15 @@
         </button>
         }
       </div>
+      <div class="download-cta">
+        <mat-form-field appearance="outline">
+          <mat-label>Token de téléchargement</mat-label>
+          <input matInput [(ngModel)]="downloadToken" placeholder="Entrez le token" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="goToDownload()">
+          Télécharger
+        </button>
+      </div>
     </div>
   </div>
 </main>

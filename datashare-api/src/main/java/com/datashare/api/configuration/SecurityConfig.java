@@ -154,6 +154,9 @@ public class SecurityConfig {
                         "/auth/me",
                         "/actuator/**",
                         "/files/download/**",
+                        "/public/upload",
+                        "/public/download/**",
+                        "/files/public/**",
                         "/error")
                     .permitAll()
                     // Other paths need authentification

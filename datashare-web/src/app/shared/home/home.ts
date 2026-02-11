@@ -5,7 +5,10 @@ import { MatGridListModule } from "@angular/material/grid-list";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatCardModule } from "@angular/material/card";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
 import { MatDialog } from "@angular/material/dialog";
+import { FormsModule } from "@angular/forms";
 
 // Services and shared components
 import { AuthService } from "../../features/auth/services/auth.service";
@@ -15,7 +18,15 @@ import { FileService } from "../../features/files/services/file.service";
 
 @Component({
   selector: "app-home",
-  imports: [MatCardModule, MatButtonModule, MatGridListModule, MatIconModule],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatGridListModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+  ],
   templateUrl: "./home.html",
   styleUrl: "./home.scss",
 })
@@ -23,7 +34,9 @@ export class Home {
   private readonly authService = inject(AuthService);
   private readonly fileService = inject(FileService);
   private readonly dialog = inject(MatDialog);
-  private readonly router: Router = new Router();
+  private readonly router = inject(Router);
+
+  downloadToken: string | null = null;
 
   // AuthService signals
   readonly currentUser = this.authService.user;
@@ -42,5 +55,11 @@ export class Home {
         message: "Veuillez vous connecter pour partager un fichier",
       },
     });
+  }
+
+  goToDownload() {
+    if (this.downloadToken && this.downloadToken.trim().length > 0) {
+      this.router.navigate([`/d/${this.downloadToken.trim()}`]);
+    }
   }
 }
