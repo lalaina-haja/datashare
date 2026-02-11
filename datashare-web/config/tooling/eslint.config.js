@@ -4,13 +4,17 @@ import tseslint from "typescript-eslint";
 
 export default [
   {
-    ignores: [".angular/**", "*.tsbuildinfo", "dist/**", "node_modules/**"],
+    ignores: [
+      ".angular/**",
+      "*.tsbuildinfo",
+      "dist/**",
+      "node_modules/**",
+      "**/*.spec.ts",
+      "**/*.steps.ts",
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  {
-    ignores: ["dist/**", "node_modules/**"],
-  },
   {
     files: ["**/*.ts"],
     rules: {

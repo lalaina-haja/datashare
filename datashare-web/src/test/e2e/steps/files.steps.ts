@@ -39,6 +39,57 @@ When("I select filter {string}", (filter: string) => {
   cy.get("mat-list").should("be.visible");
 });
 
+/** Click on delete button */
+When(
+  "I click on the delete button of the file {string}",
+  (filename: string) => {
+    cy.get('[data-testid="file-item"]')
+      .contains(filename)
+      .parents('[data-testid="file-item"]')
+      .find('[data-testid="delete-button"]')
+      .click();
+
+    cy.intercept("DELETE", "/files/my/*", { statusCode: 204, body: {} }).as(
+      "deleteFile",
+    );
+  },
+);
+
+/** Confirm the deletion */
+When("I confirm the deletion", () => {
+  cy.get('[data-testid="confirm"]').click();
+  cy.wait("@deleteFile").its("response.statusCode").should("eq", 204);
+});
+
+/** Cancel the deletion */
+When("I cancel the deletion", () => {
+  cy.get('[data-testid="cancel"]').click();
+});
+
+/** Check file still in the list */
+Then(
+  "the file {string} should still appear in the list",
+  (filename: string) => {
+    cy.get('[data-testid="file-item"]').should("contain.text", filename);
+  },
+);
+
+/** Check alert message */
+Then("I should see a dialog {string}", (message: string) => {
+  cy.get('[data-testid="alert-dialog"]').should("be.visible");
+  cy.get('[data-testid="alert-message"]').should("contain.text", message);
+});
+
+/** Check no alert displayed */
+Then("no alert dialog should be displayed", () => {
+  cy.get('[data-testid="alert-dialog"]').should("not.exist");
+});
+
+/** Check file is not in the list */
+Then("the file {string} should not appear in the list", (filename: string) => {
+  cy.get('[data-testid="file-item"]').should("not.contain.text", filename);
+});
+
 /** Check the files list is display and contains at least 1 element */
 Then("I should see the files list", () => {
   cy.wait("@getFiles");

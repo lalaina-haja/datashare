@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -45,6 +46,8 @@ public class FileServiceTest {
   @Mock TokenRepository tokenRepository;
 
   @Mock TokenService tokenService;
+
+  @Mock S3Client s3Client;
 
   @Mock Authentication authentication;
 

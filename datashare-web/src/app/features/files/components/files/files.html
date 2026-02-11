@@ -28,7 +28,7 @@
   <!-- LISTE -->
   <mat-list>
     @for (file of paginatedFiles; track $index) {
-    <mat-list-item class="file-item">
+    <mat-list-item class="file-item" data-testid="file-item">
       <div matLine class="full-width horizontal">
         <mat-icon class="file-info">{{ getFileIcon(file) }}</mat-icon>
         <div class="vertical">
@@ -47,6 +47,7 @@
             (click)="delete(file)"
             aria-label="Supprimer un fichier"
             class="btn-action"
+            data-testid="delete-button"
           >
             <mat-icon>delete</mat-icon> Supprimer
           </button>

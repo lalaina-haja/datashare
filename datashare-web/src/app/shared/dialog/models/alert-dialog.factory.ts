@@ -1,5 +1,5 @@
 import { AlertDialogData } from "./alert-dialog.model";
-import { ApiError } from "./api-error.model";
+import { ApiError } from "../../../core/models/api-error.model";
 
 /**
  * Creates an alert dialog data for an api error

@@ -1,6 +1,6 @@
 // src/app/features/files/services/file.service.ts
 
-import { inject, Injectable, signal } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { catchError, Observable, tap, throwError } from "rxjs";
 
@@ -119,6 +119,29 @@ export class FileService {
         }),
         catchError((error) => {
           this.messageSignals.error(error, "Failed to get file details");
+
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  /**
+   * Delete a user file
+   *
+   * @param tokenString the file token string
+   */
+  deleteMyFile(tokenString: string): Observable<void> {
+    return this.http
+      .delete<void>(
+        `${this.config.getEndpointUrl("files")}/my/${tokenString}`,
+        { withCredentials: true },
+      )
+      .pipe(
+        tap(() => {
+          this.message.set(null);
+        }),
+        catchError((error) => {
+          this.messageSignals.error(error, "Failed to delete file");
 
           return throwError(() => error);
         }),

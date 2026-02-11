@@ -1,8 +1,7 @@
 import {
   Component,
-  computed,
+  DestroyRef,
   inject,
-  model,
   OnInit,
   signal,
   ViewChild,
@@ -32,6 +31,13 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { FileService } from "../../services/file.service";
 import { FileMetadata } from "../../models/metadata.model";
 import { AuthService } from "../../../auth/services/auth.service";
+import { ConfirmDialogService } from "../../../../shared/dialog/services/confirm-dialog.service";
+import { firstValueFrom } from "rxjs";
+import { MatDialog } from "@angular/material/dialog";
+import { AlertDialog } from "../../../../shared/dialog/components/alert-dialog/alert-dialog";
+import { createDialogForSuccessMessage } from "../../../../shared/dialog/models/alert-dialog.factory";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
   selector: "app-files",
@@ -56,12 +62,15 @@ export class Files implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly fileService = inject(FileService);
   private readonly router: Router = new Router();
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly alerDialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   // AuthService signals
   readonly currentUser = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
-  readonly message = this.authService.message;
-  readonly error = this.authService.errorStatus;
+  readonly message = this.fileService.message;
+  readonly error = this.fileService.errorStatus;
 
   constructor() {
     if (!this.isAuthenticated()) {
@@ -70,9 +79,12 @@ export class Files implements OnInit {
   }
 
   ngOnInit() {
-    this.fileService.getMyFiles().subscribe((files) => {
-      this.files.set(files);
-    });
+    this.fileService
+      .getMyFiles()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((files) => {
+        this.files.set(files);
+      });
   }
 
   files = signal<FileMetadata[]>([]);
@@ -134,9 +146,48 @@ export class Files implements OnInit {
     return "insert_drive_file";
   }
 
-  delete(file: FileMetadata) {
+  async delete(file: FileMetadata) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: "Supprimer le fichier",
+      message: `Voulez-vous vraiment supprimer "${file.filename}" ?`,
+      confirmLabel: "Supprimer",
+      cancelLabel: "Annuler",
+    });
+
+    if (!confirmed) return;
+
     console.log("delete", file);
-    // TODO
+
+    this.fileService
+      .deleteMyFile(file.downloadToken)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.alerDialog.open(AlertDialog, {
+            panelClass: "rounded-dialog",
+            data: createDialogForSuccessMessage(
+              this.message() || "Fichier supprimé avec succès",
+            ),
+          });
+          this.fileService
+            .getMyFiles()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((files) => {
+              this.files.set(files);
+            });
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error("Delete error: ", err);
+          this.alerDialog.open(AlertDialog, {
+            panelClass: "rounded-dialog",
+            data: {
+              title: "Erreur",
+              message: this.message() || "Erreur lors de la suppression",
+            },
+          });
+          this.message.set(null);
+        },
+      });
   }
 
   formatSize(bytes: number): string {

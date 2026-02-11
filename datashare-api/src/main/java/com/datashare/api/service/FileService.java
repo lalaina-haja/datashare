@@ -15,6 +15,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -34,6 +36,8 @@ public class FileService {
   @Autowired private final FileRepository fileRepository;
 
   @Autowired private final TokenService tokenService;
+
+  @Autowired private final S3Client s3Client;
 
   private static final long MAX_SIZE = 1_000_000_000L;
   private static final Set<String> FORBIDDEN_EXT = Set.of("exe", "bat", "sh");
@@ -143,11 +147,15 @@ public class FileService {
 
     File file = this.tokenService.validateToken(tokenString);
 
-    if (file.getUserId() != user.getId()) {
-      throw new UserNotFileOwnerException(
-          "User is not owner of the file (token=" + tokenString + ")");
+    if (!file.getUserId().equals(user.getId())) {
+      throw new UserNotFileOwnerException("User is not owner of the file");
     }
 
     this.fileRepository.delete(file);
+
+    DeleteObjectRequest deleteRequest =
+        DeleteObjectRequest.builder().bucket(properties.getBucket()).key(file.getS3Key()).build();
+
+    s3Client.deleteObject(deleteRequest);
   }
 }

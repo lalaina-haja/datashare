@@ -27,8 +27,8 @@ import { MatDialog } from "@angular/material/dialog";
 // Services and Models
 import { AuthService } from "../../services/auth.service";
 import { AuthRequest } from "../../models/auth.request.model";
-import { AlertDialog } from "../../../../shared/alert-dialog/alert-dialog";
-import { createDialogForSuccessMessage } from "../../../../core/models/alert-dialog.factory";
+import { AlertDialog } from "../../../../shared/dialog/components/alert-dialog/alert-dialog";
+import { createDialogForSuccessMessage } from "../../../../shared/dialog/models/alert-dialog.factory";
 
 /** Register Component */
 @Component({

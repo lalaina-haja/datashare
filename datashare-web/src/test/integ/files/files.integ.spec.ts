@@ -25,7 +25,7 @@ const mockFiles: FileMetadata[] = [
     filename: "image.jpg",
     contentType: "image/jpg",
     size: 2048,
-    downloadToken: "BCDEFG",
+    downloadToken: "BCDEFG", 
     createdAt: new Date().toISOString(),
     expiresAt: new Date().toISOString(),
   },
@@ -50,6 +50,7 @@ describe("Files (integ)", () => {
 
     mockFileService = {
       getMyFiles: vi.fn(() => of(mockFiles)),
+      message: vi.fn(() => ""),
       getPresignedDownloadUrl: vi.fn(() => of(mockPresignedUrl)),
     };
 

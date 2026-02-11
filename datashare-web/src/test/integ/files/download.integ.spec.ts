@@ -33,7 +33,7 @@ describe("Download - INTEGRATION Tests (DOM + Router + Services)", () => {
 
     mockFileService = {
       clearMessage: vi.fn(),
-      message: signal(""),
+      message: vi.fn(() => ""),
       errorStatus: signal(false),
       getPresignedDownloadUrl: vi.fn(() => of(mockPresignedDownload)),
     };

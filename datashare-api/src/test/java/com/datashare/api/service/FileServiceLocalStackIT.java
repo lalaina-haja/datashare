@@ -2,11 +2,13 @@ package com.datashare.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.datashare.api.configuration.S3Properties;
 import com.datashare.api.dto.PresignedDownloadResponse;
 import com.datashare.api.dto.PresignedUploadResponse;
 import com.datashare.api.entities.File;
+import com.datashare.api.entities.User;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -24,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 /** FileService Integration Test with Localstack S3 */
 @SpringBootTest()
@@ -134,5 +137,60 @@ public class FileServiceLocalStackIT {
     String downloadedContent = new String(inputStream.readAllBytes());
     assertEquals(fileContent, downloadedContent);
     downloadConn.disconnect();
+  }
+
+  @Test
+  @DisplayName("INTEG-S3-003: Delete file")
+  void shouldDeleteFileCompleteLifecycle() throws Exception {
+
+    // GIVEN the user
+    User user = new User(1L, "test@mail.com", null, null);
+
+    // CREATE + UPLOAD
+    PresignedUploadResponse uploadRes =
+        fileService.createUploadUrl("delete-test.txt", "text/plain", 100, 7, 1L);
+    uploadFile(uploadRes.getUploadUrl(), "test content");
+
+    // Récupère infos DB
+    File file = tokenService.validateToken(uploadRes.getTokenString());
+
+    // Vérifie qu'elle existe
+    assertObjectExists(s3Properties.getBucket(), file.getS3Key());
+
+    // DELETE
+    fileService.deleteMyFile(user, uploadRes.getTokenString());
+
+    // Vérifie supprimé
+    assertObjectDeleted(s3Properties.getBucket(), file.getS3Key());
+
+    // CLEANUP
+    cleanupBucket();
+  }
+
+  private void uploadFile(String presignedUrl, String content) throws Exception {
+    HttpURLConnection conn = (HttpURLConnection) new URI(presignedUrl).toURL().openConnection();
+    conn.setDoOutput(true);
+    conn.setRequestMethod("PUT");
+    conn.setRequestProperty("Content-Type", "text/plain");
+    conn.getOutputStream().write(content.getBytes());
+    assertEquals(200, conn.getResponseCode());
+    conn.disconnect();
+  }
+
+  private void assertObjectExists(String bucket, String key) {
+    s3Client.getObject(r -> r.bucket(bucket).key(key));
+  }
+
+  private void assertObjectDeleted(String bucket, String key) {
+    assertThrows(
+        NoSuchKeyException.class, () -> s3Client.getObject(r -> r.bucket(bucket).key(key)));
+  }
+
+  private void cleanupBucket() {
+    s3Client
+        .listObjectsV2(r -> r.bucket(s3Properties.getBucket()))
+        .contents()
+        .forEach(
+            obj -> s3Client.deleteObject(r -> r.bucket(s3Properties.getBucket()).key(obj.key())));
   }
 }

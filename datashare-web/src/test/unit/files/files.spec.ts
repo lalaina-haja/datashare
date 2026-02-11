@@ -3,7 +3,7 @@
 // Angular Testing
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { of } from "rxjs";
+import { of, throwError } from "rxjs";
 import { signal } from "@angular/core";
 import {
   provideRouter,
@@ -15,6 +15,8 @@ import { Files } from "../../../app/features/files/components/files/files";
 import { FileMetadata } from "../../../app/features/files/models/metadata.model";
 import { FileService } from "../../../app/features/files/services/file.service";
 import { AuthService } from "../../../app/features/auth/services/auth.service";
+import { AlertDialog } from "../../../app/shared/dialog/components/alert-dialog/alert-dialog";
+import { ConfirmDialogService } from "../../../app/shared/dialog/services/confirm-dialog.service";
 
 const mockFiles: FileMetadata[] = [
   {
@@ -38,8 +40,22 @@ describe("Files (unit)", () => {
   let mockFileService: any;
   let mockAuthService: any;
   let mockRouter: any;
+  let mockConfirmDialog: any;
+  let mockAlertDialog: any;
 
   beforeEach(async () => {
+    const mockDialogRef = {
+      close: vi.fn(),
+    };
+
+    mockConfirmDialog = {
+      confirm: vi.fn(),
+    };
+
+    mockAlertDialog = {
+      open: vi.fn().mockReturnValue(mockDialogRef),
+    };
+
     mockAuthService = {
       user: signal<any>(null),
       isAuthenticated: signal<boolean>(true),
@@ -49,6 +65,8 @@ describe("Files (unit)", () => {
     mockFileService = {
       getMyFiles: vi.fn(() => of([])),
       getPresignedDownloadUrl: vi.fn(() => of(mockPresignedUrl)),
+      message: vi.fn(() => null),
+      deleteMyFile: vi.fn(() => of(null)),
     };
 
     mockRouter = vi.fn();
@@ -59,6 +77,8 @@ describe("Files (unit)", () => {
         { provide: FileService, useValue: mockFileService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: Router, useValue: mockRouter },
+        { provide: "AlertDialog", useValue: mockAlertDialog },
+        { provide: ConfirmDialogService, useValue: mockConfirmDialog },
         provideRouter([], withComponentInputBinding()),
       ],
     }).compileComponents();
@@ -85,9 +105,6 @@ describe("Files (unit)", () => {
       expect(mockFileService.getMyFiles).toHaveBeenCalled();
       expect(component.files()).toEqual(mockFiles);
     });
-
-    // ✅ SUPPRIME le test d'erreur problématique
-    // L'erreur est gérée silencieusement par le composant (pas de re-throw)
   });
 
   describe("download", () => {
@@ -108,7 +125,7 @@ describe("Files (unit)", () => {
     it("should expose auth service signals correctly", () => {
       expect(component.currentUser()).toBeNull();
       expect(component.isAuthenticated()).toBe(true);
-      expect(component.message()).toBe("");
+      expect(component.message()).toBeNull;
       expect(component.files()).toEqual([]);
     });
 
@@ -117,6 +134,82 @@ describe("Files (unit)", () => {
       mockAuthService.user.set(mockUser);
 
       expect(component.currentUser()).toEqual(mockUser);
+    });
+  });
+
+  describe("delete(file)", () => {
+    it("should NOT call API if confirmation cancelled", async () => {
+      // GIVEN confirm retourne false
+      mockConfirmDialog.confirm.mockResolvedValue(false);
+
+      // WHEN delete appelé
+      await component.delete(mockFiles[0]);
+
+      // THEN pas d'appel API
+      expect(mockFileService.deleteMyFile).not.toHaveBeenCalled();
+      expect(mockAlertDialog.open).not.toHaveBeenCalled();
+    });
+
+    it("should delete file successfully and refresh list", async () => {
+      // GIVEN confirm OK + API success
+      mockConfirmDialog.confirm.mockResolvedValue(true);
+      mockFileService.deleteMyFile.mockReturnValue(of(null));
+      mockFileService.getMyFiles.mockReturnValue(of([]));
+
+      // WHEN delete appelé
+      await component.delete(mockFiles[0]);
+
+      // THEN
+      expect(mockConfirmDialog.confirm).toHaveBeenCalledWith({
+        title: "Supprimer le fichier",
+        message: `Voulez-vous vraiment supprimer "${mockFiles[0].filename}" ?`,
+        confirmLabel: "Supprimer",
+        cancelLabel: "Annuler",
+      });
+      expect(mockFileService.deleteMyFile).toHaveBeenCalledWith(
+        mockFiles[0].downloadToken,
+      );
+      expect(mockFileService.getMyFiles).toHaveBeenCalled();
+    });
+
+    it("should show correct dialog message with filename", async () => {
+      const longFilename = "very-long-filename-document-123.pdf";
+      const fileWithLongName: FileMetadata = {
+        ...mockFiles[0],
+        filename: longFilename,
+      };
+
+      mockConfirmDialog.confirm.mockResolvedValue(true);
+
+      await component.delete(fileWithLongName);
+
+      expect(mockConfirmDialog.confirm).toHaveBeenCalledWith({
+        title: "Supprimer le fichier",
+        message: expect.stringContaining(longFilename),
+        confirmLabel: "Supprimer",
+        cancelLabel: "Annuler",
+      });
+    });
+  });
+
+  describe("delete() - Edge Cases", () => {
+    it("should handle confirmDialog throwing error", async () => {
+      mockConfirmDialog.confirm.mockRejectedValue(new Error("Dialog error"));
+
+      await expect(component.delete(mockFiles[0])).rejects.toThrow(
+        "Dialog error",
+      );
+      expect(mockFileService.deleteMyFile).not.toHaveBeenCalled();
+    });
+
+    it("should log file info before delete", async () => {
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      mockConfirmDialog.confirm.mockResolvedValue(true);
+
+      await component.delete(mockFiles[0]);
+
+      expect(consoleSpy).toHaveBeenCalledWith("delete", mockFiles[0]);
+      consoleSpy.mockRestore();
     });
   });
 });

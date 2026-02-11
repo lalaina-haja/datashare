@@ -9,7 +9,7 @@ import { MatDialog } from "@angular/material/dialog";
 
 // Services and shared components
 import { AuthService } from "../../features/auth/services/auth.service";
-import { AlertDialog } from "../alert-dialog/alert-dialog";
+import { AlertDialog } from "../dialog/components/alert-dialog/alert-dialog";
 import { Router } from "@angular/router";
 import { FileService } from "../../features/files/services/file.service";
 

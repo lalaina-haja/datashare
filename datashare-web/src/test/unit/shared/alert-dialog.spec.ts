@@ -7,9 +7,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { AlertDialogData } from "../../../app/core/models/alert-dialog.model";
+import { AlertDialogData } from "../../../app/shared/dialog/models/alert-dialog.model";
 // SUT (System Under Test)
-import { AlertDialog } from "../../../app/shared/alert-dialog/alert-dialog";
+import { AlertDialog } from "../../../app/shared/dialog/components/alert-dialog/alert-dialog";
 
 /** AlertDialog unit tests */
 describe("AlertDialog (unit)", () => {

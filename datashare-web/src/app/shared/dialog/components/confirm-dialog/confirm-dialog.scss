@@ -1,0 +1,16 @@
+.btn-primary {
+  background: #ffeae2 !important;
+  color: #f37d1c !important;
+  border: 1px solid #f37d1c !important;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 24px #bba79b !important;
+}
+
+.in-row {
+  display: flex;
+  flex-direction: row;
+}
