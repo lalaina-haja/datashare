@@ -19,59 +19,38 @@ Unit Tests
 ## Backend Tests
 
 ### Unit Tests
-
-- JUnit 5 + Mockito
-- Business logic and validators
-- Security-related rules
+- Isolated tests on classes (no Spring context loaded)
+- Using JUnit 5, Mockito, Maven Surefire plugin
+- Business logic (services, validators, etc.)
+- Security-related rules (JWT, cookies)
 
 ### Integration Tests
-
-- Spring Boot Test
-- PostgreSQL via Testcontainers
-- LocalStack for S3
-- JWT authentication flows tested
+- Spring Boot Test (using a Spring test profile)
+- H2 database and localstack via Testcontainers
+- JWT authentication, all security flows tested
+- Authentication and File Controllers 
 
 ## Frontend
 
 ### Unit Tests
-
-- Jest
-- Component and service tests
+- Isolated and mocked tests using Vitest
 - Form validation logic
+- Components and services 
 
 ### Integration Tests
-
-Validate interaction between:
-
-- components
-- services
-- routing
+- Validates interaction between components, services and routing
 - HTTP layer
+- Using vitest 
 
-Tooling:
-
-- Angular TestBed
-- Angular Component Fixture
-
-Tested Scenarios:
-
-- Authentication flows (JWT handling)
-- File upload and validation
-- Secure download via token
-- File history access
-- Error handling and UX feedback
+### End-to-End Tests
+- Cypress + Cucumber
+- Real user scenarios
+- Isolated environment (docker, localstack)
 
 ### Accessibility Testing (PSH)
-
 - Keyboard navigation
 - Screen reader compatibility
 - ARIA attributes verification
-- Lighthouse / Axe audits
-
-### End-to-End Tests
-
-- Cypress / Playwright
-- Real user scenarios
-- Isolated environment
+- Using WAVE (web accessibility evaluation tool)
 
 ### | [⬅ Back to DataShare README](../README.md) |

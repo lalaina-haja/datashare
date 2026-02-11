@@ -25,7 +25,7 @@ const mockFiles: FileMetadata[] = [
     filename: "image.jpg",
     contentType: "image/jpg",
     size: 2048,
-    downloadToken: "BCDEFG", 
+    downloadToken: "BCDEFG",
     createdAt: new Date().toISOString(),
     expiresAt: new Date().toISOString(),
   },

@@ -1,70 +1,43 @@
 # MAINTENANCE
 
 ## Purpose
-
 This document describes maintenance practices for datashare application.
 
----
+## Updating dependencies
+- Frequencies:
+  - Every 6 weeks for frontend
+  - Every 2 months for backend
+  - Every 2 months for docker images
 
-## Architecture Overview
+- Risks:
+  - Angular: breaking major changes
+  - Spring boot: security updates
+  - AWS: changes on presigned URL
 
-### REST API Architecture
+- Commands :
+```
+npm outdated
+npm update
+ng update
 
-- Stateless REST API
-- Layered architecture:
+mvn versions:display-dependency-updates 
+mvn versions:use-latest-releases
+```
+After updates, run all tests (unit, integration, e2e).
 
-  - Controller (HTTP)
-  - Service (business logic)
-  - Repository (persistence)
-
-- JWT-based authentication
-
----
-
-## Backend Maintenance (Spring Boot)
-
-- Modular domain-based packages
-- Centralized exception handling
-- Structured logging (SLF4J)
-- Health checks via Spring Boot Actuator
-
----
-
-## Frontend Maintenance (Angular)
-
-- Feature-based modular architecture
-- Shared UI components and services
-- Centralized HTTP interceptors (auth, errors)
-
----
-
-## Data Maintenance
-
-### PostgreSQL
-- Schema versioning with Flyway ?
-- Automated migrations on startup ?
-- Regular backups using pg_dump ?
-- Controlled version upgrades ?
-
-### S3 Storage
-- Private buckets
-- Lifecycle policies for expired files
-- Cleanup of orphaned files
-
----
+## Monitoring and debbuging
+- sf4j structured logs
+- Spring boot actuator
+- DevTools
 
 ## Deployment & Maintenance Scripts
-
 - Docker Compose for local development
 - Environment configuration via `.env`
-- Makefile for common tasks (build, format, quality)
-
----
-
-## Accessibility (PSH)
-
-- WCAG 2.1 AA compliance
-- Semantic HTML
-- ARIA attributes
-- Keyboard navigation support
-- Screen reader compatibility
+- Makefile for common tasks (build, format, quality). See  [Quick reference guide](docs/QUICK-REFERENCE.md)
+- Custom scripts :
+  | Scripts | Description |
+  | --- | --- |
+  | update-web-env | Update Angular environments |
+  | bum-version | Bump Application version using semantic versionning |
+  | git-hooks | lint on git commit and unit tests on git push  |
+  | create-s3-bucket | Create localstack S3 bucket and configure CORS |

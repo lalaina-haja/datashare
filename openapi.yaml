@@ -58,9 +58,9 @@ paths:
         '400':
           description: Invalid credentials
 
-  /files:
+  /files/presigned:
     post:
-      summary: Upload a private file (requires authentication)
+      summary: Get presigned URL for file upload (requires authentication)
       security:
         - httponlyBearerAuth: []
       requestBody:
@@ -68,7 +68,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UploadFileRequest'
+              $ref: '#/components/schemas/PresignedUploadRequest'
       responses:
         '201':
           description: File uploaded successfully
@@ -80,9 +80,10 @@ paths:
           description: File too large (max 1 GB) or invalid expiration date
         '401':
           description: unauthenticated (invalid or missing JWT)
-
+  
+  /files/my:
     get:
-      summary: Get user upload history
+      summary: Get user upload history (owner only)
       security:
         - httponlyBearerAuth: []
       responses:
@@ -97,15 +98,15 @@ paths:
         '401':
           description: Invalid or missing JWT
 
-  /files/public:
+  /files/public/presigned:
     post:
-      summary: Upload a public (no auth) file
+      summary: Get a presigned Upload URL for anonymous upload (no auth)
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UploadFileRequest'
+              $ref: '#/components/schemas/PresignedUploadRequest'
       responses:
         '201':
           description: Public file uploaded
@@ -139,7 +140,7 @@ paths:
           description: File not found
 
     get:
-      summary: Download a file (owner only)
+      summary: Get a presigned URL for download (owner only)
       security:
         - httponlyBearerAuth: []
       parameters:
@@ -302,55 +303,28 @@ components:
     # -----------------------------------------------------------------
     #  Upload file DTO – used for both private and public uploads
     # -----------------------------------------------------------------
-    UploadFileRequest:
+    PresignedUploadRequest:
       type: object
       description: |
-        Payload sent when uploading a file.  
-        * `file` – binary file (max 1 GB).  
-        * `password` – optional password that protects the file (ignored for public uploads).  
-        * `expiresAt` – ISO‑8601 date‑time, <= 7 days from the upload time.  
-        * `tags` – optional list of tags (max 10) used for categorisation.
+        Payload sent when requesting a presigned URL.  
+        * `filename` – file name.  
+        * `contentType` – the file type.  
+        * `size` – the file size.  
+        * `expirationDays` – file expiration days.
       required:
-        - file
-        - expiresAt
+        - filename
+        - contentType
+        - size
+        - expirationDays
       properties:
-        file:
+        filename:
           type: string
-          format: binary
-        password:
+        contentType:
           type: string
-          description: |
-            Password that protects the file.  **Only required** when the file is
-            uploaded as private (i.e., not a public upload).  Ignored for public
-            uploads.
-        expiresAt:
-          type: string
-          format: date-time
-          description: |
-            Expiration timestamp (ISO 8601).  Must be at most 7 days after the
-            upload time.
-        tags:
-          type: array
-          items:
-            type: string
-          description: List of tags attached to the file (max 10).
-      examples: 
-        - privateUpload:
-          summary: Upload with password
-          value:
-            file: <binary data>
-            password: secret123
-            expiresAt: '2023-12-31T23:59:59Z'
-            tags:
-              - rapport
-              - finance
-        - publicUpload:
-          summary: Upload without password
-          value:
-            file: <binary data>
-            expiresAt: '2023-11-15T12:00:00Z'
-            tags:
-              - marketing
+        size:
+          type: number
+        expirationDays:
+          type: number
 
     # -----------------------------------------------------------------
     #  Password payload used by the unlock endpoint
@@ -387,35 +361,27 @@ components:
     FileMetadata:
       type: object
       properties:
-        fileId:
-          type: string
-          format: uuid
-        name:
+        id:
+          type: number
+        filename:
           type: string
           description: Original filename supplied by the uploader.
         size:
-          type: integer
-          format: int64
+          type: number
           description: Size of the file in bytes.
-        downloadLink:
+        downloadUrl:
           type: string
           format: uri
           description: |
             URL that can be used to download the file.  
-            For password protected files this link contains a `token` query
-            parameter that must be presented on the final download request.
-        passwordProtected:
-          type: boolean
-          description: true when the file is protected by a password.
         expiresAt:
           type: string
           format: date-time
           description: Timestamp after which the file (or its link) is deleted.
-        tags:
-          type: array
-          items:
-            type: string
-          description: Tags attached to the file.
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of file creation.
 
     # -----------------------------------------------------------------
     #  Registration / Login response examples (kept for reference)
