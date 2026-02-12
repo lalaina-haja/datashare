@@ -9,6 +9,7 @@ import {
 } from "@angular/common/http/testing";
 import { FileService } from "../../../app/features/files/services/file.service";
 import { ConfigService } from "../../../app/core/services/config.service";
+import { AuthService } from "../../../app/features/auth/services/auth.service";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { PresignedUpload } from "../../../app/features/files/models/presigned-upload.model";
 
@@ -19,16 +20,22 @@ describe("FileService (unit)", () => {
   let service: FileService;
   let httpMock: HttpTestingController;
   let mockConfigService: { getEndpointUrl: ReturnType<typeof vi.fn> };
+  let mockAuthService: any;
 
   beforeEach(() => {
     mockConfigService = {
       getEndpointUrl: vi.fn(),
     };
 
+    mockAuthService = {
+      isAuthenticated: vi.fn(() => true),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         FileService,
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: AuthService, useValue: mockAuthService },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
       ],
@@ -68,6 +75,27 @@ describe("FileService (unit)", () => {
     const req = httpMock.expectOne(`/files/upload`);
     expect(req.request.method).toBe("POST");
     expect(req.request.withCredentials).toBe(true);
+    req.flush(mockResponse);
+  });
+
+  it("should request public presigned upload URL when not authenticated", () => {
+    // GIVEN unauthenticated
+    (mockAuthService.isAuthenticated as any).mockReturnValue(false);
+    const mockFile = new File(["content"], "test.png", { type: "image/png" });
+    const mockResponse: PresignedUpload = {
+      uploadUrl: "http://localhost:4566/fake",
+      tokenString: "ABC",
+    } as PresignedUpload;
+
+    (mockConfigService.getEndpointUrl as any).mockReturnValue("/public/upload");
+
+    service.getPresignedUploadUrl(mockFile, 7).subscribe((res) => {
+      expect(res.uploadUrl).toBe("http://localhost:4566/fake");
+    });
+
+    const req = httpMock.expectOne(`/public/upload`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.withCredentials).toBe(false);
     req.flush(mockResponse);
   });
 

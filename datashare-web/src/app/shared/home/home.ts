@@ -5,11 +5,9 @@ import { MatGridListModule } from "@angular/material/grid-list";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatCardModule } from "@angular/material/card";
-import { MatDialog } from "@angular/material/dialog";
 
 // Services and shared components
 import { AuthService } from "../../features/auth/services/auth.service";
-import { AlertDialog } from "../dialog/components/alert-dialog/alert-dialog";
 import { Router } from "@angular/router";
 import { FileService } from "../../features/files/services/file.service";
 
@@ -22,7 +20,6 @@ import { FileService } from "../../features/files/services/file.service";
 export class Home {
   private readonly authService = inject(AuthService);
   private readonly fileService = inject(FileService);
-  private readonly dialog = inject(MatDialog);
   private readonly router: Router = new Router();
 
   // AuthService signals
@@ -32,15 +29,5 @@ export class Home {
   upload() {
     this.fileService.clearMessage();
     this.router.navigate(["/files/upload"]);
-  }
-
-  notImplemented() {
-    this.dialog.open(AlertDialog, {
-      panelClass: "rounded-dialog",
-      data: {
-        title: "⚠ Telechargement anonyme non disponible",
-        message: "Veuillez vous connecter pour partager un fichier",
-      },
-    });
   }
 }

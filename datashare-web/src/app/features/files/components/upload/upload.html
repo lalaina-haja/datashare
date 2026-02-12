@@ -19,7 +19,12 @@
           <mat-icon class="file-icon" data-testid="file-icon"
             >{{ getFileIcon() }}</mat-icon
           >
-          <span class="file-name">{{ file()?.name }}</span>
+          <div class="file-info-text">
+            <span data-testid="file-name"
+              >{{ truncateFileName(file().name, 30) }}</span
+            >
+            <span data-testid="file-size">{{ formatSize(file()!.size) }}</span>
+          </div>
         </div>
         }
       </span>
@@ -57,7 +62,9 @@
       !
     </p>
     <div class="link">
-      <a [href]="fileDownloadUrl()">{{ fileDownloadUrl() }}</a>
+      <a [href]="fileDownloadUrl()" data-testid="link-download"
+        >{{ fileDownloadUrl() }}</a
+      >
     </div>
     } @else {
     <mat-label>Expiration (jours) </mat-label>

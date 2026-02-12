@@ -1,5 +1,9 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
+const checkNoUserLoggedIn = () => {
+  cy.contains("button", "Se connecter").should("exist").and("be.visible");
+};
+
 /** Log in the test user */
 Given("I am logged in", () => {
   cy.visit(`/login`);
@@ -22,6 +26,9 @@ Given("I am logged out", () => {
   cy.get('[data-testid="connection-button"]').click();
   cy.contains("button", "Se connecter").should("exist").and("be.visible");
 });
+
+/** No user is logged in */
+Given("no user is logged in", checkNoUserLoggedIn);
 
 /** Submit registration with email and password */
 When(
@@ -70,9 +77,7 @@ Then("I should be logged in", () => {
 });
 
 /** Logged out = Connexion button shows "Se connecter" */
-Then("I should be logged out", () => {
-  cy.contains("button", "Se connecter").should("exist").and("be.visible");
-});
+Then("I should be logged out", checkNoUserLoggedIn);
 
 /** Check if user is redirected to login page */
 Then("I should be redirected to login", () => {
@@ -82,9 +87,4 @@ Then("I should be redirected to login", () => {
 /** Check error message */
 Then("I should see the error message {string}", (message: string) => {
   cy.get(".error-message").should("contain", message);
-});
-
-/** Check if user is on the expected page */
-Then("I should stay at {word} page", (pageName: string) => {
-  cy.url().should("include", `/${pageName}`);
 });

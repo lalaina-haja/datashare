@@ -8,6 +8,7 @@ export interface ApiEndpoints {
   me: string;
   files: string;
   upload: string;
+  publicUpload: string;
   download: string;
 }
 
@@ -26,6 +27,7 @@ export class ConfigService {
         me: "/auth/me",
         files: "/files",
         upload: "/files/upload",
+        publicUpload: "/files/public/upload",
         download: "/files/download",
       } as const,
     },

@@ -5,15 +5,14 @@
         <h1>Tu veux partager un fichier ?</h1>
       </div>
       <div class="upload-cta">
-        @if (isAuthenticated()) {
-        <button mat-fab class="upload-btn-black" (click)="upload()">
+        <button
+          mat-fab
+          class="upload-btn-black"
+          (click)="upload()"
+          data-testid="btn-upload"
+        >
           <mat-icon>cloud_upload</mat-icon>
         </button>
-        } @else {
-        <button mat-fab class="upload-btn-black" (click)="notImplemented()">
-          <mat-icon>cloud_upload</mat-icon>
-        </button>
-        }
       </div>
     </div>
   </div>
