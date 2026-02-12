@@ -58,6 +58,21 @@ public class FileController {
             user.getId()));
   }
 
+  @PostMapping("/public/upload")
+  public ResponseEntity<PresignedUploadResponse> presignedUploadAnonymous(
+      @RequestBody PresignedUploadRequest body) {
+    // Create upload metadata without user association (userId = null)
+    PresignedUploadResponse resp =
+        fileService.createUploadUrl(
+            body.getFilename(),
+            body.getContentType(),
+            body.getSize(),
+            body.getExpirationDays(),
+            null);
+
+    return ResponseEntity.ok(resp);
+  }
+
   /**
    * Get the current user files
    *

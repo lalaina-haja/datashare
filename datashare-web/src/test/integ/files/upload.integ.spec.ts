@@ -109,7 +109,7 @@ describe("Upload (integ)", () => {
     const component = fixture.componentInstance;
     expect(component.file()).toBe(mockFile);
     expect(component.progress()).toBeNull();
-    expect(mockFileService.clearMessage).toHaveBeenCalledTimes(1);
+    expect(mockFileService.clearMessage).toHaveBeenCalledTimes(2);
   });
 
   it("should complete full upload flow", async () => {
@@ -177,15 +177,6 @@ describe("Upload (integ)", () => {
       By.css('button[class*="btn-televerser"]'),
     );
     expect(uploadBtn.nativeElement.disabled).toBeTruthy();
-  });
-
-  it("should redirect if not authenticated", () => {
-    mockAuthService.isAuthenticated.mockReturnValue(false);
-
-    const newFixture = TestBed.createComponent(Upload);
-    newFixture.detectChanges();
-
-    expect(mockAuthService.isAuthenticated).toHaveBeenCalled();
   });
 
   it("should humanize dates correctly (zoneless)", () => {

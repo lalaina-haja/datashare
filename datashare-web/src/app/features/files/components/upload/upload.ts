@@ -20,8 +20,6 @@ import { ClipboardModule } from "@angular/cdk/clipboard";
 import { PresignedUpload } from "../../models/presigned-upload.model";
 import { FileService } from "../../services/file.service";
 import { MatInputModule } from "@angular/material/input";
-import { AuthService } from "../../../auth/services/auth.service";
-import { Router } from "@angular/router";
 import { ConfigService } from "../../../../core/services/config.service";
 
 @Component({
@@ -42,9 +40,7 @@ import { ConfigService } from "../../../../core/services/config.service";
 export class Upload implements OnInit {
   private readonly fileService = inject(FileService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly authService = inject(AuthService);
   private readonly configService = inject(ConfigService);
-  private readonly router: Router = new Router();
 
   /** Published signals */
   file = signal<File | null>(null);
@@ -57,9 +53,6 @@ export class Upload implements OnInit {
   uploadSuccess = computed(() => this.fileDownloadUrl() !== null);
 
   ngOnInit(): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(["/home"]);
-    }
     this.fileService.clearMessage();
     this.fileDownloadUrl.set(null);
     this.fileExpiration.set(null);
@@ -75,6 +68,7 @@ export class Upload implements OnInit {
 
     this.file.set(input.files[0]);
     this.progress.set(null);
+    this.fileService.clearMessage();
   }
 
   upload() {
@@ -119,6 +113,37 @@ export class Upload implements OnInit {
     if (f.type.includes("pdf")) return "picture_as_pdf";
 
     return "insert_drive_file";
+  }
+
+  formatSize(bytes: number): string {
+    if (bytes === 0) return "0 B";
+
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  }
+
+  truncateFileName(filename: string, maxLength: number = 10): string {
+    // Si déjà court, retourne tel quel
+    if (filename.length <= maxLength) return filename;
+
+    const dotIndex = filename.lastIndexOf(".");
+    if (dotIndex === -1) {
+      // Pas d'extension → simple troncature
+      return filename.substring(0, maxLength) + "...";
+    }
+
+    const name = filename.substring(0, dotIndex);
+    const ext = filename.substring(dotIndex);
+
+    // Préserve extension si possible
+    if (name.length <= maxLength - ext.length - 3) {
+      return filename;
+    }
+
+    return name.substring(0, maxLength - ext.length - 3) + "..." + ext;
   }
 
   humanize(dateString: string): string {

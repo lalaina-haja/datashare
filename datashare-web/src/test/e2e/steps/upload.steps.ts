@@ -13,12 +13,22 @@ When("I select the file {string}", (filename: string) => {
 When("I click on the televerser button", () => {
   // prepare upload intercepts
   cy.getAppConfig().then((env) => {
-    cy.intercept("POST", "/files/upload").as("presigned");
+    cy.intercept("POST", "/files/**/upload").as("presigned");
     cy.intercept("PUT", new RegExp(`${env.bucketName}/uploads`)).as("upload");
   });
 
   // click button
   cy.get('[data-testid="btn-televerser"]').should("not.be.disabled").click();
+});
+
+/** Click on Upload button */
+When("I click on upload button", () => {
+  cy.get('[data-testid="btn-upload"]').should("not.be.disabled").click();
+});
+
+/** Click on Download link */
+When("I click on the download link", () => {
+  cy.get('[data-testid="link-download"]').should("not.be.disabled").click();
 });
 
 /** Upload a file */
@@ -67,8 +77,7 @@ Then("I should see the file icon {word} in the preview", (icon: string) => {
 Then(
   "I should see the file name {string} in the preview",
   (filename: string) => {
-    cy.get('[data-testid="file-preview"]').should("be.visible");
-    cy.get('[data-testid="file-preview"] .file-name')
+    cy.get('[data-testid="file-name"]')
       .should("be.visible")
       .and("contain", filename);
   },
@@ -82,6 +91,11 @@ Then("the presigned upload request is successful", () => {
     .should("have.property", "tokenString")
     .and("be.a", "string")
     .and("not.be.empty");
+});
+
+/** Check the s3 file upload request */
+Then("I should see the upload page", () => {
+  cy.wait("@upload").its("response.statusCode").should("eq", 200);
 });
 
 /** Check the s3 file upload request */

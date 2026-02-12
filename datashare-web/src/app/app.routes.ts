@@ -29,7 +29,6 @@ export const routes: Routes = [
       {
         path: "files/upload",
         component: Upload,
-        canActivate: [authGuard],
       },
       {
         path: "d/:token",

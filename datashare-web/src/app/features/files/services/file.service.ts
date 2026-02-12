@@ -112,12 +112,13 @@ export class FileService {
    */
   getPresignedDownloadUrl(token: string): Observable<PresignedDownload> {
     const isAuth = this.authService.isAuthenticated();
-    const endpointKey = isAuth ? "download" : "publicDownload";
-
     return this.http
-      .get<PresignedDownload>(`${this.config.getEndpointUrl(endpointKey)}/${token}`, {
-        withCredentials: isAuth,
-      })
+      .get<PresignedDownload>(
+        `${this.config.getEndpointUrl("download")}/${token}`,
+        {
+          withCredentials: isAuth,
+        },
+      )
       .pipe(
         tap(() => {
           this.message.set(null);

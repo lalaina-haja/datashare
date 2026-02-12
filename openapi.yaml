@@ -58,7 +58,7 @@ paths:
         '400':
           description: Invalid credentials
 
-  /files/presigned:
+  /files/upload:
     post:
       summary: Get presigned URL for file upload (requires authentication)
       security:
@@ -98,7 +98,7 @@ paths:
         '401':
           description: Invalid or missing JWT
 
-  /files/public/presigned:
+  /files/public/upload:
     post:
       summary: Get a presigned Upload URL for anonymous upload (no auth)
       requestBody:
@@ -115,9 +115,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/FileMetadata'
         '400':
-          description: File too large or invalid expiration date
+          description: File too large 
 
-  /files/{fileId}:
+  /files/my/{token}:
     delete:
       summary: Delete a file (owner only)
       security:
@@ -132,37 +132,10 @@ paths:
       responses:
         '204':
           description: File deleted
-        '403':
-          description: Forbidden (user does not own the file)
         '401':
-          description: Invalid or missing JWT token
-        '404':
-          description: File not found
+          description: Invalid token or User does not own the file
 
-    get:
-      summary: Get a presigned URL for download (owner only)
-      security:
-        - httponlyBearerAuth: []
-      parameters:
-        - name: fileId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Binary file stream (download starts)
-          content:
-            application/octet-stream: {}
-        '403':
-          description: Forbidden (user does not own the file)
-        '401':
-          description: Invalid or missing JWT token
-        '404':
-          description: File not found
-
-  /files/public/{token}:
+  /files/download/{token}:
     get:
       summary: Download a file (password protected files trigger a redirect).
       description: |
@@ -188,7 +161,7 @@ paths:
         '404':
           description: File not found or token expired.
 
-  /files/public/{token}/unlock:
+  /files/download/{token}/unlock:
     post:
       summary: Submit password to unlock a protected file.
       description: |
