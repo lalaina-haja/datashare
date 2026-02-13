@@ -71,6 +71,9 @@ help:
 	@echo -e "$(F_KEYWORD)   make test-integ           $(F_REGULAR)Run all integration tests in ci mode (API + Web)"
 	@echo -e "$(F_KEYWORD)   make test-all             $(F_REGULAR)Run all tests sequentially in ci mode (test-unit, test-integ, test-e2e)"
 	@echo ""
+	@echo -e "$(F_TITLE)Initialise database:"
+	@echo -e "$(F_KEYWORD)   make seed-db            $(F_REGULAR)Seed database with test data"
+	@echo ""
 	@echo -e "$(F_TITLE)Versioning:"
 	@echo -e "$(F_KEYWORD)   make version              $(F_REGULAR)Show current version (VERSION file)"
 	@echo -e "$(F_KEYWORD)   make bump-version         $(F_REGULAR)Bump version (TYPE=patch|minor|major)"
@@ -275,3 +278,23 @@ publish-doc: doc
 	@git add docs/
 	@git commit -m "docs: update javadoc + typedoc" || echo "Rien à commiter$(F_REGULAR)"
 	@echo -e "$(F_MESSAGE)✔ Docs versionnés Git !$(F_REGULAR)"
+
+# ============================
+# Seed DB
+# ============================
+.PHONY: seed-db 
+INIT_SCRIPT=./scripts/initdb/02_init-data.sql
+DB_CONTAINER=datashare-db
+seed-db:
+	@if [ ! -f "$(INIT_SCRIPT)" ]; then \
+		echo -e "$(F_MESSAGE)✘ SQL script missing: $(INIT_SCRIPT)$(F_REGULAR)"; \
+		exit 1; \
+	fi
+	@if ! docker ps --format '{{.Names}}' | grep -q "^$(DB_CONTAINER)$$"; then \
+		echo -e "$(F_MESSAGE)✘ The container $(DB_CONTAINER) is not running.$(F_REGULAR)"; \
+		exit 1; \
+	fi
+	@echo -e "$(F_MESSAGE)📥 Executing SQL script on PostgreSQL...$(F_REGULAR)"
+	docker exec -i $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) < $(INIT_SCRIPT)
+	@echo -e "$(F_MESSAGE)✔ Data successfully inserted.$(F_REGULAR)"
+
