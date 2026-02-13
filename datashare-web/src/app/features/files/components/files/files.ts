@@ -93,8 +93,8 @@ export class Files implements OnInit {
   // Pagination
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild("filterGroup") filterGroup!: MatButtonToggleGroup;
-  pageSize = 5;
-  pageSizeOptions = [3, 5];
+  pageSize = 4;
+  pageSizeOptions = [2, 4];
   currentPageIndex = 0;
 
   // Computed réactifs

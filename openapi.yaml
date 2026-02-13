@@ -123,12 +123,11 @@ paths:
       security:
         - httponlyBearerAuth: []
       parameters:
-        - name: fileId
+        - name: token
           in: path
           required: true
           schema:
             type: string
-            format: uuid
       responses:
         '204':
           description: File deleted
